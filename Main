@@ -1,0 +1,139 @@
+getgenv().toggle = false
+getgenv().toggle2 = false
+local plr = game:GetService("Players").LocalPlayer
+local weaponName ="Combat"
+local mob ="Sakurai Demon"
+local Distance
+local punch
+for i,v in pairs(getgc()) do
+    if type(v) == "function" and getinfo(v).name == "do_punch" then
+        punch = v
+    end
+end
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Project Slayers", HidePremium = true})
+local Tab = Window:MakeTab({
+	Name = "Farm",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab:AddToggle({
+	Name = "Start",
+	Default = false,
+	Callback = function(Value)
+		toggle = Value
+    end
+})
+Tab:AddTextbox({
+	Name = "Name of Weapon",
+	Default = "Combat",
+	TextDisappear = false,
+	Callback = function(Value)
+		weaponName = string.lower(Value)
+	end	  
+})
+Tab:AddTextbox({
+    Name = "Name Of Mob/Boss",
+    Default = "Zoku's Subordinate",
+    TextDisappear = false,
+    Callback = function(Value)
+        mob = string.lower(Value)
+    end
+})
+Tab:AddSlider({
+	Name = "Distance",
+	Min = 0,
+	Max = 20,
+	Default = 7,
+	Color = Color3.fromRGB(140, 0, 255),
+	Increment = 0.1,
+	ValueName = "Studs",
+	Callback = function(Value)
+		Distance =  Value *-1
+	end    
+})
+local Tab2 = Window:MakeTab({
+	Name = "Misc",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab2:AddToggle({
+    Name = "Inf Stam",
+	Default = false,
+	Callback = function(Value)
+		toggle2 = Value
+    end
+})
+local mt = getrawmetatable(game)
+make_writeable(mt)
+
+local namecall = mt.__namecall
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+
+    if method == "FireServer" and (tostring(self) == "Sun_Damage" or tostring(self) == "water_damage") then
+       return
+    end
+    return namecall(self, table.unpack(args))
+end)
+function findWeapon(which,name)
+    if plr == which then 
+        for i,v in pairs(plr.Backpack:GetChildren()) do
+            if string.lower(v.Name) == name then return v end
+        end
+    else 
+        if plr.Character == which then
+            for i,v in pairs(plr.Character:GetChildren()) do
+                if string.lower(v.Name) == name then return v end
+            end
+        end
+    end
+    return 
+end
+task.spawn(function()
+        while wait(1) do
+            if toggle2 then
+                local func 
+                for i,v in pairs(getgc()) do
+                    if type(v) == "function" and getinfo(v).name == "AddStamina" then
+                        func = v 
+                    end
+                end
+                if func then
+                    func(plr,100000)
+                end
+            end
+        end
+    end
+)
+while wait(1) do
+    if toggle then
+        for i,v in pairs(workspace:GetDescendants())do
+            if v:IsA("Model") and string.lower(v.Name) == mob and v:FindFirstChild("Humanoid") then
+                repeat
+                    wait()
+                    if not toggle then break end
+                    char = plr.Character
+                    local frame = v:GetModelCFrame()
+                    repeat wait()  until char.PrimaryPart ~= nil
+                    char.HumanoidRootPart.CFrame = frame + frame.LookVector*Distance
+                    local tool  =findWeapon(char,weaponName)
+                    if tool == nil then
+                        while wait() do
+                            local backpack = findWeapon(plr,weaponName) 
+                            if backpack then 
+                                local clone = backpack:Clone()
+                                char.Humanoid:EquipTool(clone)
+                                break
+                            end
+                        end
+                    else
+                        punch(1)    
+                    end
+                until v.Humanoid.Health <=0
+            end
+        end
+    end 
+end
