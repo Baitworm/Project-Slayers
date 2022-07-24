@@ -1,139 +1,131 @@
-getgenv().toggle = false
-getgenv().toggle2 = false
+--vars
 local plr = game:GetService("Players").LocalPlayer
-local weaponName ="Combat"
-local mob ="Sakurai Demon"
-local Distance
-local punch
-for i,v in pairs(getgc()) do
-    if type(v) == "function" and getinfo(v).name == "do_punch" then
-        punch = v
+getgenv().toggle = false
+getgenv().Train ="Strength"
+local VIM = game:GetService("VirtualInputManager")
+local folder = workspace.Roadwork
+local tab = {}
+--functions
+local function Strength()
+    local char = plr.Character
+    local bag = workspace["Punching Bags"]["Punching Bag"]
+    if char:FindFirstChild("Gloves") then
+            char.Humanoid:UnequipTools()
+            char.Humanoid:EquipTool(plr.Backpack.Combat)
+    else 
+        if char:FindFirstChild("Combat") and char:FindFirstChild("LeftGloves") then
+                char.HumanoidRootPart.CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector *-4
+                char.Combat:Activate()
+                wait()
+        else
+            for i,v in pairs(workspace.Items:GetDescendants()) do
+                if v.Name == "Gloves $75" then 
+                    char.HumanoidRootPart.CFrame = v:GetModelCFrame()
+                    fireclickdetector(v.Parent.ClickDetector,5)
+                    char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
+                    if char:FindFirstChild("Gloves") then
+                        char.Gloves:Activate()
+                    end
+                end
+            end
+        end
+    end    
+end
+local function findAnimTrack(id)
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    for i,v in pairs(char.Humanoid.Animator:GetPlayingAnimationTracks()) do
+        if tostring(v.Animation.AnimationId) == id then
+            return v
+        end
+    end
+    return nil
+end
+local function Dura()
+    local folder = workspace.TrainingStations
+    local char = plr.Character 
+    if findAnimTrack("rbxassetid://5755883987")== nil or not findAnimTrack("rbxassetid://5755883987") then
+        char.HumanoidRootPart.CFrame = folder.Model:GetModelCFrame()
+        fireclickdetector(folder.Model.ClickDetector,5)
+    else
+        print("not Tp")
+        if findAnimTrack("rbxassetid://5755883987") ~= nil and (not findAnimTrack("rbxassetid://5755885183") or findAnimTrack("rbxassetid://5755885183") == nil) then
+            print("click")
+            repeat
+                VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
+                VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
+                wait()
+            until findAnimTrack("rbxassetid://5755885183") or plr.Stamina.Value <=100
+            findAnimTrack("rbxassetid://5755885183").Stopped:Wait()
+        end
     end
 end
+local function Speed()
+    local char = plr.Character 
+    for i,v in pairs(tab) do
+        firetouchinterest(char.HumanoidRootPart,tab[i],1000000)
+    end
+end
+--Gui stuff
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "Project Slayers", HidePremium = true})
+local Window = OrionLib:MakeWindow({Name = "Tatakai", HidePremium = true})
 local Tab = Window:MakeTab({
+	Name = "Tps",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab:AddDropdown({
+	Name = "Tps",
+	Default = "Gym Area",
+	Options = {"Gym Area", "Bank","Clinic","Burger Shop","Barber Shop","Highschool","RamenShop","Ranked Matches","Weight Clinic","Sumo Area"},
+	Callback = function(Value)
+	    local char = plr.Character
+		char.HumanoidRootPart.CFrame = workspace.LOCATER:FindFirstChild(Value):GetModelCFrame()
+	end    
+})
+local Tab2 = Window:MakeTab({
 	Name = "Farm",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
-Tab:AddToggle({
+Tab2:AddToggle({
 	Name = "Start",
 	Default = false,
 	Callback = function(Value)
 		toggle = Value
+		wait(1)
+        while toggle do
+            if Train =="Strength" then 
+                Strength()
+            else
+                if Train == "Dura" then
+                    Dura()
+                else
+                        Speed()
+                end
+            end
+            wait()
+        end
     end
 })
-Tab:AddTextbox({
-	Name = "Name of Weapon",
-	Default = "Combat",
-	TextDisappear = false,
+Tab2:AddDropdown({
+	Name = "Type",
+	Default = "Strength",
+	Options = {"Strength", "Dura","Speed"},
 	Callback = function(Value)
-		weaponName = string.lower(Value)
-	end	  
-})
-Tab:AddTextbox({
-    Name = "Name Of Mob/Boss",
-    Default = "Zoku's Subordinate",
-    TextDisappear = false,
-    Callback = function(Value)
-        mob = string.lower(Value)
-    end
-})
-Tab:AddSlider({
-	Name = "Distance",
-	Min = 0,
-	Max = 20,
-	Default = 7,
-	Color = Color3.fromRGB(140, 0, 255),
-	Increment = 0.1,
-	ValueName = "Studs",
-	Callback = function(Value)
-		Distance =  Value *-1
+        Train = Value
 	end    
 })
-local Tab2 = Window:MakeTab({
-	Name = "Misc",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-Tab2:AddToggle({
-    Name = "Inf Stam",
-	Default = false,
-	Callback = function(Value)
-		toggle2 = Value
+for i,v in pairs(workspace.Items:GetDescendants()) do
+    if v.Name == "Gloves $75" then 
+        v.Parent:Destroy()
+        break
     end
-})
-local mt = getrawmetatable(game)
-make_writeable(mt)
-
-local namecall = mt.__namecall
-
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-
-    if method == "FireServer" and (tostring(self) == "Sun_Damage" or tostring(self) == "water_damage") then
-       return
-    end
-    return namecall(self, table.unpack(args))
-end)
-function findWeapon(which,name)
-    if plr == which then 
-        for i,v in pairs(plr.Backpack:GetChildren()) do
-            if string.lower(v.Name) == name then return v end
-        end
-    else 
-        if plr.Character == which then
-            for i,v in pairs(plr.Character:GetChildren()) do
-                if string.lower(v.Name) == name then return v end
-            end
-        end
-    end
-    return 
 end
-task.spawn(function()
-        while wait(1) do
-            if toggle2 then
-                local func 
-                for i,v in pairs(getgc()) do
-                    if type(v) == "function" and getinfo(v).name == "AddStamina" then
-                        func = v 
-                    end
-                end
-                if func then
-                    func(plr,100000)
-                end
-            end
+
+for g=1,8 do
+    for i,v in pairs(folder:GetChildren()) do
+        if tostring(#tab +1) == v.Name then
+            table.insert(tab,v)
         end
     end
-)
-while wait(1) do
-    if toggle then
-        for i,v in pairs(workspace:GetDescendants())do
-            if v:IsA("Model") and string.lower(v.Name) == mob and v:FindFirstChild("Humanoid") then
-                repeat
-                    wait()
-                    if not toggle then break end
-                    char = plr.Character
-                    local frame = v:GetModelCFrame()
-                    repeat wait()  until char.PrimaryPart ~= nil
-                    char.HumanoidRootPart.CFrame = frame + frame.LookVector*Distance
-                    local tool  =findWeapon(char,weaponName)
-                    if tool == nil then
-                        while wait() do
-                            local backpack = findWeapon(plr,weaponName) 
-                            if backpack then 
-                                local clone = backpack:Clone()
-                                char.Humanoid:EquipTool(clone)
-                                break
-                            end
-                        end
-                    else
-                        punch(1)    
-                    end
-                until v.Humanoid.Health <=0
-            end
-        end
-    end 
 end
