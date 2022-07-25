@@ -1,5 +1,188 @@
-while wait() do
-    for i,v in pairs(game:GetDescendants()) do
-        if v:IsA("Sound") then v:Destroy() end
+--vars
+local plr = game:GetService("Players").LocalPlayer
+getgenv().toggle = false
+getgenv().toggle2 = false
+getgenv().Train ="Strength"
+local VIM = game:GetService("VirtualInputManager")
+local tweenService = game:GetService("TweenService")
+--functions
+local function Strength()
+    local char = plr.Character
+    local bag = workspace["Punching Bags"]["Punching Bag"]
+    if char:FindFirstChild("Gloves") then
+            char.Humanoid:UnequipTools()
+            char.Humanoid:EquipTool(plr.Backpack.Combat)
+    else 
+        if char:FindFirstChild("Combat") and char:FindFirstChild("LeftGloves") then
+                local tweenInfo = TweenInfo.new(0.4,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+                local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector *-4})
+                tween:Play()
+                char.Combat:Activate()
+                wait()
+        else
+            for i,v in pairs(workspace.Items:GetDescendants()) do
+                if v.Name == "Gloves $75" then 
+                    local tweenInfo = TweenInfo.new(0.1,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+                    local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{CFrame = v:GetModelCFrame()})
+                    tween:Play()
+                    fireclickdetector(v.Parent.ClickDetector,5)
+                    char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
+                    if char:FindFirstChild("Gloves") then
+                        char.Gloves:Activate()
+                    end
+                end
+            end
+        end
+    end    
+end
+local function findAnimTrack(id)
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    for i,v in pairs(char.Humanoid.Animator:GetPlayingAnimationTracks()) do
+        if tostring(v.Animation.AnimationId) == id then
+            return v
+        end
+    end
+    return nil
+end
+local function Dura()
+    local folder = workspace.TrainingStations
+    local char = plr.Character 
+    if findAnimTrack("rbxassetid://5755883987")== nil or not findAnimTrack("rbxassetid://5755883987") then
+        local tweenInfo = TweenInfo.new(1,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+        local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{CFrame = folder.Model:GetModelCFrame()})
+        tween:Play()
+        tween.Completed:Wait()
+        fireclickdetector(folder.Model.ClickDetector,5)
+    else
+        print("not Tp")
+        if findAnimTrack("rbxassetid://5755883987") ~= nil and (not findAnimTrack("rbxassetid://5755885183") or findAnimTrack("rbxassetid://5755885183") == nil) then
+            print("click")
+            repeat
+                VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
+                VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
+                wait()
+            until findAnimTrack("rbxassetid://5755885183")
+            findAnimTrack("rbxassetid://5755885183").Stopped:Wait()
+        end
     end
 end
+local function Speed() -- working on
+    local char = plr.Character 
+    for i,v in pairs(workspace.Items:GetDescendants()) do
+        if v.Name == "Roadwork $150" then
+            char.HumanoidRootPart.CFrame = v:GetModelCFrame()
+            repeat
+                print("click")
+                fireclickdetector(v.Parent.ClickDetector,5)
+                wait()
+            until plr.Backpack:FindFirstChild("Roadwork")
+            char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Roadwork"))
+            char:FindFirstChild("Roadwork"):Activate()
+        end
+    end
+    for i=1,8 do
+        print(i)
+        for _,v in pairs(workspace.Roadwork) do
+            if v.Name == tostring(i) then
+                char.HumanoidRootPart.CFrame = v.CFrame
+                repeat
+                    firetouchinterest(char.HumanoidRootPart,v,10)
+                until not v.Marker.Enabled
+            end
+        end
+    end
+end
+--Gui stuff
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Tatakai", HidePremium = true})
+local Tab = Window:MakeTab({
+	Name = "Misc",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab:AddDropdown({
+	Name = "Tps",
+	Default = "Gym Area",
+	Options = {"Gym Area", "Bank","Clinic","Burger Shop","Barber Shop","Highschool","RamenShop","Ranked Matches","Weight Clinic","Sumo Area"},
+	Callback = function(Value)
+	    local char = plr.Character
+        local tweenInfo = TweenInfo.new(2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+        local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{CFrame = workspace.LOCATER:FindFirstChild(Value):GetModelCFrame()})
+        tween:Play()
+        tween.Completed:Wait()
+	end    
+})
+Tab:AddToggle({
+	Name = "Auto Eat",
+	Default = false,
+	Callback = function(Value)
+		toggle2 = Value
+        task.spawn(function()
+            while toggle2 do
+                local char = plr.Character or plr.CharacterAdded:Wait()
+                for i,v in pairs(plr.Backpack:GetChildren()) do
+                    if v.Name == "Burger" then -- change food type lmao
+                        repeat wait() until char:FindFirstChild("Combat")
+                        char.Humanoid:EquipTool(v)
+                        char:FindFirstChild(v.Name):Activate()
+                        break
+                    end
+                end
+                wait(300)
+            end
+        end)
+    end
+})
+local Tab2 = Window:MakeTab({
+	Name = "Farm",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab2:AddToggle({
+	Name = "Start",
+	Default = false,
+	Callback = function(Value)
+		toggle = Value
+		wait(1)
+        task.spawn(function()
+            while toggle do
+                if Train =="Strength" then 
+                    Strength()
+                else
+                    if Train == "Dura" then
+                        Dura()
+                    else
+                            Speed()
+                    end
+                end
+                wait()
+            end
+        end)
+    end
+})
+Tab2:AddDropdown({
+	Name = "Type",
+	Default = "Strength",
+	Options = {"Strength", "Dura","Speed"},
+	Callback = function(Value)
+        Train = Value
+	end    
+})
+for i,v in pairs(workspace.Items:GetDescendants()) do
+    if v.Name == "Gloves $75" then 
+        v.Parent:Destroy()
+        break
+    end
+end
+for i,v in pairs(workspace.Items:GetDescendants()) do
+    if v.Name == "Roadwork $150" then 
+        v.Parent:Destroy()
+        break
+    end
+end
+local bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
+bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
+bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
