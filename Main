@@ -3,8 +3,6 @@ local plr = game:GetService("Players").LocalPlayer
 getgenv().toggle = false
 getgenv().Train ="Strength"
 local VIM = game:GetService("VirtualInputManager")
-local folder = workspace.Roadwork
-local tab = {}
 --functions
 local function Strength()
     local char = plr.Character
@@ -54,15 +52,36 @@ local function Dura()
                 VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
                 VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
                 wait()
-            until findAnimTrack("rbxassetid://5755885183") or plr.Stamina.Value <=100
+            until findAnimTrack("rbxassetid://5755885183")
             findAnimTrack("rbxassetid://5755885183").Stopped:Wait()
         end
     end
 end
-local function Speed()
+local function Speed() -- working on
     local char = plr.Character 
-    for i,v in pairs(tab) do
-        firetouchinterest(char.HumanoidRootPart,tab[i],1000000)
+    for i,v in pairs(workspace.Items:GetDescendants()) do
+        if v.Name == "Roadwork $150" then
+            char.HumanoidRootPart.CFrame = v:GetModelCFrame()
+            repeat
+                print("click")
+                fireclickdetector(v.Parent.ClickDetector,5)
+                wait()
+            until plr.Backpack:FindFirstChild("Roadwork")
+            char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Roadwork"))
+            char:FindFirstChild("Roadwork"):Activate()
+        end
+    end
+    for i=1,8 do
+        print(i)
+        for _,v in pairs(workspace.Roadwork) do
+            if v.Name == tostring(i) then
+                print("yes")
+                char.HumanoidRootPart.CFrame = v.CFrame
+                repeat
+                    firetouchinterest(char.HumanoidRootPart,v,10)
+                until not v.Marker.Enabled
+            end
+        end
     end
 end
 --Gui stuff
@@ -121,11 +140,15 @@ for i,v in pairs(workspace.Items:GetDescendants()) do
         break
     end
 end
-
-for g=1,8 do
-    for i,v in pairs(folder:GetChildren()) do
-        if tostring(#tab +1) == v.Name then
-            table.insert(tab,v)
-        end
+for i,v in pairs(workspace.Items:GetDescendants()) do
+    if v.Name == "Roadwork $150" then 
+        v.Parent:Destroy()
+        break
     end
 end
+local bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
+bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
+bag1 = workspace["Punching Bags"]["Punching Bag"]
+bag1:Destroy()
