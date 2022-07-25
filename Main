@@ -54,9 +54,7 @@ local function Dura()
         tween.Completed:Wait()
         fireclickdetector(folder.Model.ClickDetector,5)
     else
-        print("not Tp")
-        if findAnimTrack("rbxassetid://5755883987") ~= nil and (not findAnimTrack("rbxassetid://5755885183") or findAnimTrack("rbxassetid://5755885183") == nil) then
-            print("click")
+        if findAnimTrack("rbxassetid://5755883987") ~= nil and (not findAnimTrack("rbxassetid://5755885183") or findAnimTrack("rbxassetid://5755885183") == nil) and plr.Stamina.Value >50 then
             repeat
                 VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
                 VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
@@ -122,7 +120,9 @@ Tab:AddToggle({
                 local char = plr.Character or plr.CharacterAdded:Wait()
                 for i,v in pairs(plr.Backpack:GetChildren()) do
                     if v.Name == "Burger" then -- change food type lmao
-                        repeat wait() until char:FindFirstChild("Combat")
+                        if Train =="Strength" then 
+                            repeat wait() until char:FindFirstChild("Combat")
+                        end
                         char.Humanoid:EquipTool(v)
                         char:FindFirstChild(v.Name):Activate()
                         break
@@ -181,8 +181,6 @@ for i,v in pairs(workspace.Items:GetDescendants()) do
     end
 end
 local bag1 = workspace["Punching Bags"]["Punching Bag"]
-bag1:Destroy()
-bag1 = workspace["Punching Bags"]["Punching Bag"]
 bag1:Destroy()
 bag1 = workspace["Punching Bags"]["Punching Bag"]
 bag1:Destroy()
