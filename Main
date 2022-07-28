@@ -18,14 +18,16 @@ spawn(function() -- auto pullup
 end)
 spawn(function() -- auto eat
     while toggle do
-        for i,v in pairs(plr.Backpack:GetChildren()) do
-            if v:IsA("Tool") and v.Name == "Ramen" then 
-                local char = plr.Character
-                char.Humanoid:EquipTool(v)
-                char:FindFirstChild(v.Name):Activate()
-                break;
+        repeat
+            for i,v in pairs(plr.Backpack:GetChildren()) do
+                if v:IsA("Tool") and v.Name == "Burger" then 
+                    local char = plr.Character
+                    char.Humanoid:EquipTool(v)
+                    char:FindFirstChild(v.Name):Activate()
+                    break;
+                end
             end
-        end
-        wait(600)
+        until 
+        wait(420)
     end
 end)
