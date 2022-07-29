@@ -5,51 +5,59 @@ local cat = workspace.Quests.QuestLocations.Cat
 local briefcase = workspace.Quests.QuestLocations.Briefcase
 getgenv().toggle = true
 
-while toggle do
-    local char = plr.Character or plr.CharacterAdded:Wait()
-    char.ChildAdded:Connect(function(child)
-        if child.Name == "QuestCD" then child:Destroy() end
-    end)
-    local quest = char:FindFirstChild("Quest")
-    if quest ~= nil then
-        if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
-            local loc =  quest.Location.Value
-            if quest.PlayerQuest.Value == "Briefcase" then
-                local case = briefcase:FindFirstChild(tostring(loc)).Case
-                local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
-                repeat 
-                    char.HumanoidRootPart.CFrame = case.CFrame 
-                    fireclickdetector(cd,32)
-                    wait()
-                until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-            else
-                if quest.PlayerQuest.Value == "Cat" then
-                    local place = cat[tostring(loc)]
-                    local cd = place.ClickDetector
+function doQuest()
+    while toggle do
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        local quest = char:FindFirstChild("Quest")
+        if quest ~= nil then
+            if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
+                local loc =  quest.Location.Value
+                if quest.PlayerQuest.Value == "Briefcase" then
+                    local case = briefcase:FindFirstChild(tostring(loc)).Case
+                    local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
                     repeat 
-                        char.HumanoidRootPart.CFrame = place.CFrame 
+                        char.HumanoidRootPart.CFrame = case.CFrame 
                         fireclickdetector(cd,32)
                         wait()
                     until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                 else
-                    local place = deliv[tostring(loc)]
-                    repeat 
-                        char.HumanoidRootPart.CFrame = place.CFrame 
-                        firetouchinterest(char.HumanoidRootPart,place,0)
-                        firetouchinterest(char.HumanoidRootPart,place,1)
-                        wait()
-                    until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+                    if quest.PlayerQuest.Value == "Cat" then
+                        local place = cat[tostring(loc)]
+                        local cd = place.ClickDetector
+                        repeat 
+                            char.HumanoidRootPart.CFrame = place.CFrame 
+                            fireclickdetector(cd,32)
+                            wait()
+                        until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+                    else
+                        local place = deliv[tostring(loc)]
+                        repeat 
+                            char.HumanoidRootPart.CFrame = place.CFrame + place.CFrame.UpVector * -2
+                            firetouchinterest(char.HumanoidRootPart,place,0)
+                            firetouchinterest(char.HumanoidRootPart,place,1)
+                            wait()
+                        until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+                    end
                 end
+            else
+                quest:Destroy()
             end
         else
-            quest:Destroy()
+            local args = {
+                [1] = "Quest"
+            }
+            game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+            char.ChildAdded:Wait()
         end
-    else
-        local args = {
-            [1] = "Quest"
-        }
-        game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-        char.ChildAdded:Wait()
+        wait()
     end
-    wait()
 end
+spawn(function()
+    doQuest()
+end)
+plr.CharacterAdded:Connect(function(char)
+    wait(6)
+    spawn(function()
+        doQuest()
+    end)
+end)
