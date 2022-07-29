@@ -1,33 +1,55 @@
-local folder = workspace.TrainingStations
 local plr = game:GetService("Players").LocalPlayer
-local bar = folder:GetChildren()[3]
-getgenv().toggle = false
-local VIM = game:GetService("VirtualInputManager")
-loadstring(game:HttpGet("https://raw.githubusercontent.com/batusz/main/roblox/__Anti__Afk__Script__", true))()
-spawn(function() -- auto pullup
-    while toggle do
-        if plr.Stamina.Value <=50 then 
-            repeat wait() until plr.Stamina.Value>=1010 
-        else
-            fireclickdetector(bar.ClickDetector,5)
-            VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
-            VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
-        end
-        wait()
-    end
-end)
-spawn(function() -- auto eat
-    while toggle do
-        repeat
-            for i,v in pairs(plr.Backpack:GetChildren()) do
-                if v:IsA("Tool") and v.Name == "Burger" then 
-                    local char = plr.Character
-                    char.Humanoid:EquipTool(v)
-                    char:FindFirstChild(v.Name):Activate()
-                    break;
+
+local deliv = workspace.Quests.QuestLocations.Delivery
+local cat = workspace.Quests.QuestLocations.Cat
+local briefcase = workspace.Quests.QuestLocations.Briefcase
+getgenv().toggle = true
+
+while toggle do
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    char.ChildAdded:Connect(function(child)
+        if child.Name == "QuestCD" then child:Destroy() end
+    end)
+    local quest = char:FindFirstChild("Quest")
+    if quest ~= nil then
+        if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
+            local loc =  quest.Location.Value
+            if quest.PlayerQuest.Value == "Briefcase" then
+                local case = briefcase:FindFirstChild(tostring(loc)).Case
+                local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
+                repeat 
+                    char.HumanoidRootPart.CFrame = case.CFrame 
+                    fireclickdetector(cd,32)
+                    wait()
+                until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+            else
+                if quest.PlayerQuest.Value == "Cat" then
+                    local place = cat[tostring(loc)]
+                    local cd = place.ClickDetector
+                    repeat 
+                        char.HumanoidRootPart.CFrame = place.CFrame 
+                        fireclickdetector(cd,32)
+                        wait()
+                    until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+                else
+                    local place = deliv[tostring(loc)]
+                    repeat 
+                        char.HumanoidRootPart.CFrame = place.CFrame 
+                        firetouchinterest(char.HumanoidRootPart,place,0)
+                        firetouchinterest(char.HumanoidRootPart,place,1)
+                        wait()
+                    until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                 end
             end
-        until 
-        wait(420)
+        else
+            quest:Destroy()
+        end
+    else
+        local args = {
+            [1] = "Quest"
+        }
+        game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+        char.ChildAdded:Wait()
     end
-end)
+    wait()
+end
