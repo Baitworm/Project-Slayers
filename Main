@@ -15,6 +15,7 @@ local minStam,maxStam
 local foodName
 local covType,toolType
 function autoQuest()
+    local connect
     local deliv = workspace.Quests.QuestLocations.Delivery
     local cat = workspace.Quests.QuestLocations.Cat
     local briefcase = workspace.Quests.QuestLocations.Briefcase
@@ -62,6 +63,16 @@ function autoQuest()
             char.ChildAdded:Wait()
         end
         wait()
+    end
+    if questToggle then
+        connect = plr.CharacterAdded:Connect(function(char)
+            wait(6)
+            spawn(function()
+                autoQuest()
+            end)
+        end)
+    else
+        connect:Disconnect()
     end
 end
 function autoDura()
