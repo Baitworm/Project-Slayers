@@ -208,6 +208,14 @@ Tab3:AddSlider({
 		maxStam = Value
 	end    
 })
+Tab3:AddToggle({
+	Name = "Auto Eat",
+	Default = false,
+	Callback = function(Value)
+	    eatToggle = Value
+        autoEat()
+    end
+})
 Tab3:AddDropdown({
 	Name = "Food to auto eat",
 	Default = "Chicken",
