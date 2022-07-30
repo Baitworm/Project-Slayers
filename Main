@@ -87,7 +87,7 @@ function autoEat()
                 break;
             end
         end
-        if foodName == "Chicken" or foodName == "Chocolate Shake" then
+        if foodName == "Chicken" or (string.find(foodName,"Shake"))then
             wait(32)
         else
             wait(600)
