@@ -208,7 +208,7 @@ Tab3:AddSlider({
 		maxStam = Value
 	end    
 })
-Tab:AddDropdown({
+Tab3:AddDropdown({
 	Name = "Food to auto eat",
 	Default = "Chicken",
 	Options = {"Chicken","Burger", "Chocolate Shake","Mango Shake","Strawberry Shake","Ramen"}, -- work on meditate
