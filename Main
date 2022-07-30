@@ -113,7 +113,14 @@ function autoEquip(tool)
     end
 end
 function autoGang()
-    return
+    local vault = workspace.GangArea.Vault
+    while gangToggle do
+        local char = plr.Character
+        char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.UpVector * -5
+        if char:FindFirstChild("Combat") then char:FindFirstChild("Combat"):Activate()
+        else char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
+        wait()
+    end
 end
 function autoPB()
     return
@@ -136,20 +143,27 @@ Tab:AddToggle({
 	Name = "Coventional Grind",
 	Default = false,
 	Callback = function(Value)
-		if covType == "Pullups" then
-            duraToggle = Value
-            autoDura()
+        if Value == false then
+            duraToggle = false
+            gloveToggle = false
+            questToggle = false
+            gangToggle = false
         else
-            if covType == "Gloves" then
-                gloveToggle = Value
-                autoGloves()
+            if covType == "Pullups" then
+                duraToggle = Value
+                autoDura()
             else
-                if covType == "Money" then
-                    questToggle = Value
-                    autoQuest()
+                if covType == "Gloves" then
+                    gloveToggle = Value
+                    autoGloves()
                 else
-                    gangToggle = Value
-                    autoGang()
+                    if covType == "Money" then
+                        questToggle = Value
+                        autoQuest()
+                    else
+                        gangToggle = Value
+                        autoGang()
+                    end
                 end
             end
         end
