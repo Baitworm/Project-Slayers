@@ -107,7 +107,7 @@ function autoEquip(tool)
                 break;
             end
         end
-        if yes == nil then continue; end
+        if yes == nil then wait() continue; end
         char:WaitForChild("Humanoid"):EquipTool(yes)
         wait()
     end
@@ -233,7 +233,7 @@ Tab3:AddDropdown({
 	end    
 })
 Tab3:AddBind({
-	Name = "Bind",
+	Name = "Auto Click",
 	Default = Enum.KeyCode.T,
 	Hold = false,
 	Callback = function()
