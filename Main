@@ -95,7 +95,7 @@ function autoGloves()
     while gloveToggle do
         local char = plr.Character
         if plr.Backpack:FindFirstChild("Gloves") then -- tp to bags (also change if statement) char:FindFirstChild("LeftGloves")
-            char.HumanoidRootPart.CFrame = workspace["Punching Bags"][bagNum].HumanoidRootPart.CFrame.LookVector * -2
+            char.HumanoidRootPart.CFrame = workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame.LookVector * -2
         else -- buy gloves
             wait()
         end
