@@ -144,27 +144,20 @@ Tab:AddToggle({
 	Name = "Coventional Grind",
 	Default = false,
 	Callback = function(Value)
-        if Value == false then
-            duraToggle = false
-            gloveToggle = false
-            questToggle = false
-            gangToggle = false
+        if covType == "Pullups" then
+            duraToggle = Value
+            autoDura()
         else
-            if covType == "Pullups" then
-                duraToggle = Value
-                autoDura()
+            if covType == "Gloves" then
+                gloveToggle = Value
+                autoGloves()
             else
-                if covType == "Gloves" then
-                    gloveToggle = Value
-                    autoGloves()
+                if covType == "Money" then
+                    questToggle = Value
+                    autoQuest()
                 else
-                    if covType == "Money" then
-                        questToggle = Value
-                        autoQuest()
-                    else
-                        gangToggle = Value
-                        autoGang()
-                    end
+                    gangToggle = Value
+                    autoGang()
                 end
             end
         end
@@ -237,6 +230,15 @@ Tab3:AddDropdown({
 	Options = {"Chicken","Burger", "Chocolate Shake","Mango Shake","Strawberry Shake","Ramen"}, -- work on meditate
 	Callback = function(Value)
 		foodName = Value
+	end    
+})
+Tab3:AddBind({
+	Name = "Bind",
+	Default = Enum.KeyCode.T,
+	Hold = false,
+	Callback = function()
+		clickToggle = not clickToggle
+        autoClick()
 	end    
 })
 plr.CharacterAdded:Connect(function(char)
