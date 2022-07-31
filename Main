@@ -11,7 +11,7 @@ getgenv().PBToggle = false
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local minStam,maxStam
+local minStam
 local foodName
 local covType,toolType
 function autoQuest()
@@ -66,12 +66,8 @@ function autoQuest()
 end
 function autoDura()
     while duraToggle do
-        if plr.Stamina.Value <=minStam then 
-            repeat wait() until plr.Stamina.Value>=maxStam
-        else
-            for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
-                fireclickdetector(v.ClickDetector,5)
-            end
+        for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
+            fireclickdetector(v.ClickDetector,5)
         end
         wait()
     end
@@ -131,7 +127,10 @@ function autoPB()
     return
 end
 function autoClick()
-    while clickToggle do 
+    while clickToggle do
+        if  plr.Stamina.Value <= minStam then
+            repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat,"/")[2])
+        end
         VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
         VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
         wait()
@@ -186,7 +185,7 @@ Tab:AddToggle({
 Tab:AddDropdown({
 	Name = "Tool",
 	Default = "Squat",
-	Options = {"Squat","Situp", "Pushup","Dumbbell","Meditate","Jumping Rope"}, -- work on meditate
+	Options = {"Squat","Situp", "Pushup","Meditate","Jumping Rope","20 KG Dumbbell","50 KG Dumbbell","100 KG Dumbbell","200 KG Dumbbell"}, -- work on meditate
 	Callback = function(Value)
 		toolType = Value
 	end    
@@ -208,18 +207,7 @@ Tab3:AddSlider({
 		minStam = Value
 	end    
 })
-Tab3:AddSlider({
-	Name = "Maximum Stamina",
-	Min = 0,
-	Max = 1000,
-	Default = 50,
-	Color = Color3.fromRGB(0, 247, 255),
-	Increment = 1,
-	ValueName = "",
-	Callback = function(Value)
-		maxStam = Value
-	end    
-})
+
 Tab3:AddToggle({
 	Name = "Auto Eat",
 	Default = false,
