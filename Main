@@ -169,6 +169,7 @@ Tab:AddToggle({
                     autoQuest()
                 else
                     gangToggle = Value
+                    if not gangToggle then plr.Character.HumanoidRootPart.Anchored = false end
                     autoGang()
                 end
             end
