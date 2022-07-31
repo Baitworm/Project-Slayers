@@ -97,18 +97,22 @@ end
 function autoGloves()
     return
 end
+local function support(tool)
+    for i,v in pairs(plr.Backpack:GetChildren()) do
+        if string.find(v.Name,tool) then
+            return v
+        end
+    end
+    return nil
+end
 function autoEquip(tool)
     while equipToggle do
         local char = plr.Character
         local yes
-        for i,v in pairs(plr.Backpack:GetChildren()) do
-            if string.find(v.Name,tool) then
-                yes = v
-                break;
-            end
+        yes = support(tool)
+        if yes then
+            char:WaitForChild("Humanoid"):EquipTool(yes)
         end
-        if yes == nil then wait() continue; end
-        char:WaitForChild("Humanoid"):EquipTool(yes)
         wait()
     end
 end
