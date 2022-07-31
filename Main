@@ -140,10 +140,11 @@ end
 function autoClick()
     while clickToggle do
         if  plr.Stamina.Value <= minStam then
-            repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat,"/")[2])
+            repeat wait() print("Stuck") until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat,"/")[2])
+        else
+            VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
+            VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
         end
-        VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
-        VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
         wait()
     end
 end
