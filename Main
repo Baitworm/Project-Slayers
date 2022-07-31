@@ -14,6 +14,7 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
 local minStam
 local foodName
 local covType,toolType
+local bagNum
 function autoQuest()
     local deliv = workspace.Quests.QuestLocations.Delivery
     local cat = workspace.Quests.QuestLocations.Cat
@@ -91,9 +92,17 @@ function autoEat()
     end
 end
 function autoGloves()
-    return
+    while gloveToggle do
+        local char = plr.Character
+        if char:FindFirstChild("Gloves") then -- tp to bags (also change if statement)
+            char.HumanoidRootPart.CFrame = workspace["Punching Bags"][bagNum].HumanoidRootPart.CFrame.LookVector * -2
+        else -- buy gloves
+            wait()
+        end
+        wait()
+    end
 end
-local function support(tool)
+local function supportEquip(tool)
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool) then
             return v
@@ -105,7 +114,7 @@ function autoEquip(tool)
     while equipToggle do
         local char = plr.Character
         local yes
-        yes = support(tool)
+        yes = supportEquip(tool)
         if yes then
             char:WaitForChild("Humanoid"):EquipTool(yes)
         end
@@ -169,9 +178,17 @@ Tab:AddToggle({
 Tab:AddDropdown({
 	Name = "Type",
 	Default = "Pullups",
-	Options = {"Pullups","Glove", "Money","Gangbase",},
+	Options = {"Pullups","Gloves", "Money","Gangbase",},
 	Callback = function(Value)
 		covType = Value
+	end    
+})
+Tab:AddDropdown({
+	Name = "Bag Select (ignore if not doing bags)",
+	Default = 1,
+	Options = {1,2,3,4,5,6},
+	Callback = function(Value)
+		bagNum = Value
 	end    
 })
 Tab:AddToggle({
