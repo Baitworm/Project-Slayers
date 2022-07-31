@@ -125,8 +125,7 @@ function autoGang()
     local vault = workspace.GangArea.Vault
     while gangToggle do
         local char = plr.Character
-        char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -4
-        print(char.HumanoidRootPart.Anchored)
+        char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
         if char:FindFirstChild("Combat") then char:FindFirstChild("Combat"):Activate()
         else char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
         wait()
