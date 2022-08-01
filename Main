@@ -76,7 +76,6 @@ function autoQuest()
     end
 end
 function autoDura()
-    if not duraToggle then return end
     for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
         fireclickdetector(v.ClickDetector,5)
     end
