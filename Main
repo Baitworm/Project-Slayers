@@ -10,106 +10,108 @@ getgenv().clickToggle = false
 getgenv().PBToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
+local runService = game:GetService("RunService")
 local VIM = game:GetService("VirtualInputManager")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
 local covType,toolType
 local bagNum
+local connections = { -- equip needs work
+    duraConnect = runService.Heartbeat:Connect(autoDura),
+    questConnect = runService.Heartbeat:Connect(autoQuest),
+    eatConnect = runService.Heartbeat:Connect(autoEat),
+    buyConnect = runService.Heartbeat:Connect(autoBuyFood),
+    gloveConect =runService.Heartbeat:Connect(autoGloves),
+    gangConnect = runService.Heartbeat:Connect(autoGang),
+    clickConnect = runService.Heartbeat:Connect(autoClick),
+    PBConnect = runService.Heartbeat:Connect(autoPB)
+}
 function autoQuest()
+    if not questToggle then return end
     local deliv = workspace.Quests.QuestLocations.Delivery
     local cat = workspace.Quests.QuestLocations.Cat
     local briefcase = workspace.Quests.QuestLocations.Briefcase
-    while questToggle do
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local quest = char:FindFirstChild("Quest")
-        if quest ~= nil then
-            if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
-                local loc =  quest.Location.Value
-                if quest.PlayerQuest.Value == "Briefcase" then
-                    local case = briefcase:FindFirstChild(tostring(loc)).Case
-                    local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local quest = char:FindFirstChild("Quest")
+    if quest ~= nil then
+        if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
+            local loc =  quest.Location.Value
+            if quest.PlayerQuest.Value == "Briefcase" then
+                local case = briefcase:FindFirstChild(tostring(loc)).Case
+                local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
+                repeat 
+                    char.HumanoidRootPart.CFrame = case.CFrame 
+                    fireclickdetector(cd,32)
+                    wait()
+                until char:FindFirstChild("Quest") == nil or quest.Objective.Value
+            else
+                if quest.PlayerQuest.Value == "Cat" then
+                    local place = cat[tostring(loc)]
+                    local cd = place.ClickDetector
                     repeat 
-                        char.HumanoidRootPart.CFrame = case.CFrame 
+                        char.HumanoidRootPart.CFrame = place.CFrame 
                         fireclickdetector(cd,32)
                         wait()
                     until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                 else
-                    if quest.PlayerQuest.Value == "Cat" then
-                        local place = cat[tostring(loc)]
-                        local cd = place.ClickDetector
-                        repeat 
-                            char.HumanoidRootPart.CFrame = place.CFrame 
-                            fireclickdetector(cd,32)
-                            wait()
-                        until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-                    else
-                        local place = deliv[tostring(loc)]
-                        repeat 
-                            char.HumanoidRootPart.CFrame = place.CFrame + place.CFrame.UpVector * -2
-                            firetouchinterest(char.HumanoidRootPart,place,0)
-                            firetouchinterest(char.HumanoidRootPart,place,1)
-                            wait()
-                        until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-                    end
+                    local place = deliv[tostring(loc)]
+                    repeat 
+                        char.HumanoidRootPart.CFrame = place.CFrame + place.CFrame.UpVector * -2
+                        firetouchinterest(char.HumanoidRootPart,place,0)
+                        firetouchinterest(char.HumanoidRootPart,place,1)
+                        wait()
+                    until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                 end
-            else
-                quest:Destroy()
             end
         else
-            local args = {
-                [1] = "Quest"
-            }
-            game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-            char.ChildAdded:Wait()
+            quest:Destroy()
         end
-        wait()
+    else
+        local args = {
+            [1] = "Quest"
+        }
+        game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+        char.ChildAdded:Wait()
     end
 end
 function autoDura()
-    while duraToggle do
-        for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
-            fireclickdetector(v.ClickDetector,5)
-        end
-        wait()
+    if not duraToggle then return end
+    for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
+        fireclickdetector(v.ClickDetector,5)
     end
 end
 
 function autoEat()
-    while eatToggle do
-        for i,v in pairs(plr.Backpack:GetChildren()) do
-            if v:IsA("Tool") and v.Name == foodName then 
-                local char = plr.Character
-                char.Humanoid:EquipTool(v)
-                char:FindFirstChild(v.Name):Activate()
-                break;
-            end
+    if not eatToggle then return end
+    for i,v in pairs(plr.Backpack:GetChildren()) do
+        if v:IsA("Tool") and v.Name == foodName then 
+            local char = plr.Character
+            char.Humanoid:EquipTool(v)
+            char:FindFirstChild(v.Name):Activate()
+            break;
         end
-        if foodName == "Chicken" or (string.find(foodName,"Shake"))then
-            wait(32)
-        else
-            wait(600)
-        end
+    end
+    if foodName == "Chicken" or (string.find(foodName,"Shake"))then
+        wait(32)
+    else
+        wait(600)
     end
 end
 function autoBuyFood()
-    while buyToggle do
-        for i,v in pairs(workspace.Items:GetDescendants()) do
-            if string.find(v.Name, foodName) then 
-                fireclickdetector(v.Parent.ClickDetector,12)
-            end
+    if not buyToggle then return end
+    for i,v in pairs(workspace.Items:GetDescendants()) do
+        if string.find(v.Name, foodName) then 
+            fireclickdetector(v.Parent.ClickDetector,12)
         end
-        wait()
     end
 end
-function autoGloves()
-    while gloveToggle do
-        local char = plr.Character
-        if plr.Backpack:FindFirstChild("Gloves") then -- tp to bags (also change if statement) char:FindFirstChild("LeftGloves")
-            char.HumanoidRootPart.CFrame = workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame + workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame.LookVector * -6
-        else -- buy gloves
-            wait()
-        end
+function autoGloves() -- needs work
+    if not gloveToggle then return end
+    local char = plr.Character
+    if plr.Backpack:FindFirstChild("Gloves") then -- tp to bags (also change if statement) char:FindFirstChild("LeftGloves")
+        char.HumanoidRootPart.CFrame = workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame + workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame.LookVector * -6
+    else -- buy gloves
         wait()
     end
 end
@@ -121,42 +123,36 @@ local function supportEquip(tool)
     end
     return nil
 end
-function autoEquip(tool)
-    while equipToggle do
-        local char = plr.Character
-        local yes
-        yes = supportEquip(tool)
-        if yes then
-            char:WaitForChild("Humanoid"):EquipTool(yes)
-        end
-        wait()
+function autoEquip() -- check
+    if not equipToggle then return end
+    local char = plr.Character
+    local yes
+    yes = supportEquip(toolType)
+    if yes then
+        char:WaitForChild("Humanoid"):EquipTool(yes)
     end
 end
-function autoGang()
+function autoGang() -- work on
+    if not gangToggle then return end
     local vault = workspace.GangArea.Vault
-    while gangToggle do
-        local char = plr.Character
-        if char:FindFirstChild("Combat") and workspace.CurrentCamera.Focus == CFrame.new(-2475.2019, -20.3218689, 1438.65527, 1, 0, 0, 0, 1, 0, 0, 0, 1) then 
-            print("stuck2")
-            char:FindFirstChild("Combat"):Activate()
-        else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
-        print("stuck")
-        char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
-        wait()
-    end
+    local char = plr.Character
+    if char:FindFirstChild("Combat") and workspace.CurrentCamera.Focus == CFrame.new(-2475.2019, -20.3218689, 1438.65527, 1, 0, 0, 0, 1, 0, 0, 0, 1) then 
+        print("stuck2")
+        char:FindFirstChild("Combat"):Activate()
+    else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
+    print("stuck")
+    char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
 end
-function autoPB()
+function autoPB() -- work obviously
     return
 end
 function autoClick()
-    while clickToggle do
-        if  plr.Stamina.Value <= minStam then
-            repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat.Text,"/")[2])
-        else
-            VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
-            VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
-        end
-        wait()
+    if not clickToggle then return end
+    if  plr.Stamina.Value <= minStam then
+        repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat.Text,"/")[2])
+    else
+        VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
+        VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
     end
 end
 
@@ -172,18 +168,14 @@ Tab:AddToggle({
 	Callback = function(Value)
         if covType == "Pullups" then
             duraToggle = Value
-            autoDura()
         else
             if covType == "Gloves" then
                 gloveToggle = Value
-                autoGloves()
             else
                 if covType == "Money" then
                     questToggle = Value
-                    autoQuest()
                 else
                     gangToggle = Value
-                    autoGang()
                 end
             end
         end
@@ -210,7 +202,6 @@ Tab:AddToggle({
 	Default = false,
 	Callback = function(Value)
 		equipToggle = Value
-        autoEquip(toolType)
     end
 })
 Tab:AddDropdown({
@@ -244,7 +235,6 @@ Tab3:AddToggle({
 	Default = false,
 	Callback = function(Value)
 	    eatToggle = Value
-        autoEat()
     end
 })
 Tab3:AddToggle({
@@ -252,7 +242,6 @@ Tab3:AddToggle({
     Default = false,
     Callback = function(Value)
         buyToggle = Value
-        autoBuyFood()
     end
 })
 Tab3:AddDropdown({
@@ -269,13 +258,15 @@ Tab3:AddBind({
 	Hold = false,
 	Callback = function()
 		clickToggle = not clickToggle
-        autoClick()
 	end    
 })
+--[[
 plr.CharacterAdded:Connect(function(char)
     wait(6)
     spawn(function()
         autoQuest()
     end)
 end)
+--]]
+
 OrionLib:Init()
