@@ -1,4 +1,3 @@
-game.Loaded:Wait()
 -- toggles
 getgenv().questToggle = false
 getgenv().duraToggle = false
