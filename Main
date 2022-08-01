@@ -154,7 +154,17 @@ function autoClick()
 end
 function findFunc(name)
     for i,v in pairs(getfenv()) do
-        if type(v) == "function" then print(debug.getinfo(v).name) end
+        if type(v) == "function" then 
+            if type(debug.getinfo(v).name) == "table" then
+                for _,g in pairs(debug.getinfo(v).name) do
+                    print(_,g)
+                    print(string.rep("-",25))
+                end
+            else
+                print(debug.getinfo(v).name) 
+            end
+            
+        end
     end
 end
 function connectHandler(name,bool)
