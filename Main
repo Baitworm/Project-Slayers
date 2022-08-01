@@ -11,7 +11,6 @@ getgenv().PBToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local runService = game:GetService("RunService")
-print(runService)
 local VIM = game:GetService("VirtualInputManager")
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
