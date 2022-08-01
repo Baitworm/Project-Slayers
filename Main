@@ -154,7 +154,7 @@ function autoClick()
 end
 function findFunc(name)
     for i,v in pairs(getfenv()) do
-        if type(v) == "function" then print(debug.getinfo(v)) end
+        if type(v) == "function" then print(debug.getinfo(v).name) end
     end
 end
 function connectHandler(name,bool)
