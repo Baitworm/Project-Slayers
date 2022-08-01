@@ -19,16 +19,7 @@ local minStam
 local foodName
 local covType,toolType
 local bagNum
-local connections = { -- equip needs work
-    duraConnect = runService.Heartbeat:Connect(autoDura),
-    questConnect = runService.Heartbeat:Connect(autoQuest),
-    eatConnect = runService.Heartbeat:Connect(autoEat),
-    buyConnect = runService.Heartbeat:Connect(autoBuyFood),
-    gloveConect =runService.Heartbeat:Connect(autoGloves),
-    gangConnect = runService.Heartbeat:Connect(autoGang),
-    clickConnect = runService.Heartbeat:Connect(autoClick),
-    PBConnect = runService.Heartbeat:Connect(autoPB)
-}
+
 function autoQuest()
     if not questToggle then return end
     local deliv = workspace.Quests.QuestLocations.Delivery
@@ -157,7 +148,16 @@ function autoClick()
         VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
     end
 end
-
+local connections = { -- equip needs work
+    duraConnect = runService.Heartbeat:Connect(autoDura),
+    questConnect = runService.Heartbeat:Connect(autoQuest),
+    eatConnect = runService.Heartbeat:Connect(autoEat),
+    buyConnect = runService.Heartbeat:Connect(autoBuyFood),
+    gloveConect =runService.Heartbeat:Connect(autoGloves),
+    gangConnect = runService.Heartbeat:Connect(autoGang),
+    clickConnect = runService.Heartbeat:Connect(autoClick),
+    PBConnect = runService.Heartbeat:Connect(autoPB)
+}
 local Window = OrionLib:MakeWindow({Name = "Tatakai V DOGSHIT", HidePremium = true})
 local Tab = Window:MakeTab({
 	Name = "Farms",
