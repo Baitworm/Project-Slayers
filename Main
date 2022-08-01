@@ -2,6 +2,7 @@
 getgenv().questToggle = false
 getgenv().duraToggle = false
 getgenv().eatToggle = false
+getgenv().buyToggle = false
 getgenv().equipToggle= false
 getgenv().gloveToggle = false
 getgenv().gangToggle = false
@@ -89,6 +90,16 @@ function autoEat()
         else
             wait(600)
         end
+    end
+end
+function autoBuyFood()
+    while buyToggle do
+        for i,v in pairs(workspace.Items:GetDescendants()) do
+            if string.find(v.Name, foodName) then 
+                fireclickdetector(v.Parent.ClickDetector,12)
+            end
+        end
+        wait()
     end
 end
 function autoGloves()
@@ -236,8 +247,16 @@ Tab3:AddToggle({
         autoEat()
     end
 })
+Tab3:AddToggle({
+    Name = "Auto Buy",
+    Default = false,
+    Callback = function(Value)
+        buyToggle = Value
+        autoBuyFood()
+    end
+})
 Tab3:AddDropdown({
-	Name = "Food to auto eat",
+	Name = "Food to auto eat/buy",
 	Default = "Chicken",
 	Options = {"Chicken","Burger", "Chocolate Shake","Mango Shake","Strawberry Shake","Ramen"}, -- work on meditate
 	Callback = function(Value)
