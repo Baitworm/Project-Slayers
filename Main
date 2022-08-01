@@ -1,6 +1,5 @@
 -- toggles
 getgenv().questToggle = false
-getgenv().duraToggle = false
 getgenv().eatToggle = false
 getgenv().buyToggle = false
 getgenv().equipToggle= false
@@ -28,7 +27,6 @@ local connections = { -- equip needs work
     PBConnect = nil
 }
 function autoQuest()
-    if not questToggle then return end
     local deliv = workspace.Quests.QuestLocations.Delivery
     local cat = workspace.Quests.QuestLocations.Cat
     local briefcase = workspace.Quests.QuestLocations.Briefcase
@@ -154,6 +152,20 @@ function autoClick()
         VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
     end
 end
+function findFunc(name)
+    for i,v in pairs(getfenv()) do
+        if type(v) == "function" then print(debug.getinfo(v)) end
+    end
+end
+function connectHandler(name,bool)
+    if bool then
+        connections[name] = runService.Heartbeat:Connect(autoDura)
+    else
+        if connections[name] ~= nil then
+            connections[name]:Disconnect()
+        end
+    end
+end
 local Window = OrionLib:MakeWindow({Name = "Tatakai V DOGSHIT", HidePremium = true})
 local Tab = Window:MakeTab({
 	Name = "Farms",
@@ -165,13 +177,7 @@ Tab:AddToggle({
 	Default = false,
 	Callback = function(Value)
         if covType == "Pullups" then
-            if Value then
-                connections["duraConnect"] = runService.Heartbeat:Connect(autoDura)
-            else
-                if connections["duraConnect"] ~= nil then
-                    connections["duraConnect"]:Disconnect()
-                end
-            end
+            connectHandler("dura")
         else
             if covType == "Gloves" then
                 gloveToggle = Value
@@ -274,3 +280,4 @@ end)
 --]]
 
 OrionLib:Init()
+findFunc("yes")
