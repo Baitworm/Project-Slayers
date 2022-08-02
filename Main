@@ -153,14 +153,14 @@ function autoClick()
 end
 function findFunc(name)
     for i,v in next, getgc() do
-        if type(v) == "function" then 
-            print(type(debug.getinfo(v).Name))
+        if type(v) == "function" then
             if string.find(debug.getinfo(v).Name,name) then return v end
         end
     end
 end
 function findIndexName(name)
     for i,v in pairs(connections) do
+        print(i)
         if string.find(i,name) then return i end
     end
 end
