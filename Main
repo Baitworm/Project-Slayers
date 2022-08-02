@@ -17,14 +17,14 @@ local foodName
 local covType,toolType
 local bagNum
 local connections = { -- equip needs work
-    duraConnect = nil,
-    questConnect = nil,
-    eatConnect = nil,
-    buyConnect = nil,
-    gloveConect =nil,
-    gangConnect = nil,
-    clickConnect = nil,
-    PBConnect = nil
+    duraConnect = "1",
+    questConnect = "1",
+    eatConnect = "1",
+    buyConnect = "1",
+    gloveConect ="1",
+    gangConnect = "1",
+    clickConnect = "1",
+    PBConnect = "1"
 }
 function autoQuest()
     local deliv = workspace.Quests.QuestLocations.Delivery
@@ -169,7 +169,7 @@ function connectHandler(name,bool)
     if bool then
         connections[Name] = runService.Heartbeat:Connect(findFunc(name))
     else
-        if connections[Name] ~= nil then
+        if connections[Name] ~= "1" then
             connections[Name]:Disconnect()
         end
     end
