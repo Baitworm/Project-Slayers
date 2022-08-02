@@ -40,7 +40,6 @@ local funcs = {
         end
     end,
     questConnect = function()
-        print(cat,deliv,briefcase)
             local char = plr.Character or plr.CharacterAdded:Wait()
             local quest = char:FindFirstChild("Quest")
             if quest ~= nil then
