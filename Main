@@ -10,6 +10,7 @@ local minStam
 local foodName
 local covType,toolType
 local bagNum
+local timer
 local function supportEquip(tool)
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool) then
@@ -83,6 +84,22 @@ local funcs = {
         end
     end,
     eatConnect = function()
+        if foodName == "Chicken" or (string.find(foodName,"Shake"))then
+            if timer and os.clock() - timer >= 32 then 
+                timer = os.clock()
+            else 
+                if not timer then timer = os.clock() end 
+                return
+            end 
+            
+        else
+            if timer and os.clock() - timer >= 600 then 
+                timer = os.clock()
+            else 
+                if not timer then timer = os.clock() end 
+                return
+            end 
+        end
         for i,v in pairs(plr.Backpack:GetChildren()) do
             if v:IsA("Tool") and v.Name == foodName then 
                 local char = plr.Character
@@ -91,11 +108,7 @@ local funcs = {
                 break;
             end
         end
-        if foodName == "Chicken" or (string.find(foodName,"Shake"))then
-            wait(32)
-        else
-            wait(600)
-        end
+        
     end,
     buyConnect = function()
         for i,v in pairs(workspace.Items:GetDescendants()) do
