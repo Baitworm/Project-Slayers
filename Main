@@ -191,6 +191,7 @@ Tab:AddToggle({
                 gloveToggle = Value
             else
                 if covType == "Money" then
+                    print("money")
                     connectHandler("quest",Value)
                 else
                     gangToggle = Value
