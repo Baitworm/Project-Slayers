@@ -160,12 +160,12 @@ function findFunc(name)
 end
 function findIndexName(name)
     for i,v in pairs(connections) do
-        print(i)
         if string.find(i,name) then return i end
     end
 end
 function connectHandler(name,bool)
     local Name = findIndexName(name)
+    print(Name)
     if bool then
         connections[Name] = runService.Heartbeat:Connect(findFunc(name))
     else
