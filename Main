@@ -78,7 +78,6 @@ function autoDura()
         fireclickdetector(v.ClickDetector,5)
     end
 end
-
 function autoEat()
     if not eatToggle then return end
     for i,v in pairs(plr.Backpack:GetChildren()) do
@@ -155,6 +154,7 @@ end
 function findFunc(name)
     for i,v in next, getgc() do
         if type(v) == "function" then 
+            print(type(debug.getinfo(v).Name))
             if string.find(debug.getinfo(v).Name,name) then return v end
         end
     end
