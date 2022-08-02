@@ -11,6 +11,9 @@ local foodName
 local covType,toolType
 local bagNum
 local timer
+local deliv = workspace.Quests.QuestLocations.Delivery
+local cat = workspace.Quests.QuestLocations.Cat
+local briefcase = workspace.Quests.QuestLocations.Briefcase
 local function supportEquip(tool)
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool) then
@@ -37,6 +40,7 @@ local funcs = {
         end
     end,
     questConnect = function()
+        
             local char = plr.Character or plr.CharacterAdded:Wait()
             local quest = char:FindFirstChild("Quest")
             if quest ~= nil then
