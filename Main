@@ -34,7 +34,7 @@ local funcs = {
         while questToggle do
             local char = plr.Character or plr.CharacterAdded:Wait()
             local quest = char:FindFirstChild("Quest")
-            if quest ~= nil and quest:FindFirstChild("Objective") then
+            if quest ~= nil then
                 if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
                     local loc =  quest.Location.Value
                     if quest.PlayerQuest.Value == "Briefcase" then
@@ -74,6 +74,7 @@ local funcs = {
                 game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
                 char.ChildAdded:Wait()
             end
+            wait()
         end
     end,
     autoDura = function()
