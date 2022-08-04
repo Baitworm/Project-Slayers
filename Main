@@ -131,9 +131,12 @@ local funcs = {
             local char = plr.Character
             print("stuck")
             char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
+            
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
-                char:FindFirstChild("Combat"):Activate()
+                delay(1.7,function()
+                    char:FindFirstChild("Combat"):Activate()
+                end)
             else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
             wait(1/workspace:GetRealPhysicsFPS())
         end
