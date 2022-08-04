@@ -129,12 +129,12 @@ local funcs = {
         while gangToggle do
             local vault = workspace.GangArea.Vault
             local char = plr.Character
-            if char:FindFirstChild("Combat") and workspace.CurrentCamera.Focus == CFrame.new(-2475.2019, -20.3218689, 1438.65527, 1, 0, 0, 0, 1, 0, 0, 0, 1) then 
+            print("stuck")
+            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
+            if char:FindFirstChild("Combat") then 
                 print("stuck2")
                 char:FindFirstChild("Combat"):Activate()
             else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
-            print("stuck")
-            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
