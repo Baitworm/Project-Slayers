@@ -134,9 +134,8 @@ local funcs = {
             
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
-                delay(1.7,function()
-                    char:FindFirstChild("Combat"):Activate()
-                end)
+                wait(1.7)
+                char:FindFirstChild("Combat"):Activate()
             else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
             wait(1/workspace:GetRealPhysicsFPS())
         end
