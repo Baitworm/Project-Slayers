@@ -129,7 +129,7 @@ local funcs = {
         while gangToggle do
             local vault = workspace.GangArea.Vault
             local char = plr.Character
-            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame
+            char.HumanoidRootPart.CFrame = vault.CFrame
             
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
