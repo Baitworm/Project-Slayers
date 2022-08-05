@@ -129,12 +129,10 @@ local funcs = {
         while gangToggle do
             local vault = workspace.GangArea.Vault
             local char = plr.Character
-            print("stuck")
-            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
+            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame
             
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
-                wait(1.7)
                 char:FindFirstChild("Combat"):Activate()
             else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
             wait(1/workspace:GetRealPhysicsFPS())
@@ -154,7 +152,7 @@ local funcs = {
     autoPB = function() -- work obviously
         return
     end,
-    autoEquip = function() -- check
+    autoEquip = function() -- meditate needs work
         while equipToggle do
             local char = plr.Character
             local yes
