@@ -10,14 +10,13 @@ getgenv().PBToggle = false
 getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
-local runService = game:GetService("RunService")
 local VIM = game:GetService("VirtualInputManager")
+local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(0.5,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
 local covType,toolType
-local bagNum
-local timer
+local bagNum, gloveCounter
 local deliv = workspace.Quests.QuestLocations.Delivery
 local cat = workspace.Quests.QuestLocations.Cat
 local briefcase = workspace.Quests.QuestLocations.Briefcase
@@ -117,10 +116,33 @@ local funcs = {
     autoGloves = function() -- needs work
         while gloveToggle do
             local char = plr.Character
-            if plr.Backpack:FindFirstChild("Gloves") then -- tp to bags (also change if statement) char:FindFirstChild("LeftGloves")
-                char.HumanoidRootPart.CFrame = workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame + workspace["Punching Bags"]:GetChildren()[bagNum].HumanoidRootPart.CFrame.LookVector * -6
-            else -- buy gloves
-                wait()
+            local bag = workspace["Punching Bags"]:GetChildren()[bagNum]
+            if char:FindFirstChild("Gloves") then
+                if not char:FindFirstChild("LeftGloves") then
+                    char:FindFirstChild("Gloves"):Activate()
+                end
+                char.Humanoid:UnequipTools()
+                char.Humanoid:EquipTool(plr.Backpack.Combat)
+            else
+                if char:FindFirstChild("Combat") and char:FindFirstChild("LeftGloves") then
+                    local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector * -4})
+                    tween:Play()
+                else
+                    gloveCounter = 0
+                    for i,v in pairs(workspace.Items:GetDescendants()) do
+                        if v.Name == "Gloves $75" then
+                            if gloveCounter == 0 then
+                                gloveCounter = gloveCounter + 1
+                            else
+                                local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = v:GetModelCFrame()})
+                                tween:Play()
+                                tween.Completed:Wait()
+                                fireclickdetector(v.Parent.ClickDetector,5)
+                                char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
+                            end
+                        end
+                    end
+                end
             end
             wait(1/workspace:GetRealPhysicsFPS())
         end
@@ -128,8 +150,9 @@ local funcs = {
     autoGang = function() -- work on
         while gangToggle do
             local vault = workspace.GangArea.Vault
+            vault.CanCollide = false
             local char = plr.Character
-            char.HumanoidRootPart.CFrame = vault.CFrame + vault.CFrame.LookVector * -5
+            char.HumanoidRootPart.CFrame = vault.CFrame
             
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
