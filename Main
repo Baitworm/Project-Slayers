@@ -11,7 +11,7 @@ getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
-local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(0.5,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(1,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
@@ -20,6 +20,7 @@ local bagNum, gloveCounter
 local deliv = workspace.Quests.QuestLocations.Delivery
 local cat = workspace.Quests.QuestLocations.Cat
 local briefcase = workspace.Quests.QuestLocations.Briefcase
+local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
 local function supportEquip(tool)
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool) then
@@ -113,7 +114,7 @@ local funcs = {
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
-    autoGloves = function() -- needs work
+    autoGloves = function()
         while gloveToggle do
             local char = plr.Character
             local bag = workspace["Punching Bags"]:GetChildren()[bagNum]
@@ -152,8 +153,8 @@ local funcs = {
             local vault = workspace.GangArea.Vault
             vault.CanCollide = false
             local char = plr.Character
-            char.HumanoidRootPart.CFrame = vault.CFrame
-            
+            local tween = tweenService:Create(char.HumanoidRootPart,TweenInfo.new(0.3,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0), {CFrame = vault.CFrame})
+            tween:Play()
             if char:FindFirstChild("Combat") then 
                 print("stuck2")
                 char:FindFirstChild("Combat"):Activate()
@@ -163,11 +164,22 @@ local funcs = {
     end,
     autoClick = function()
         while clickToggle do
+            local char = plr.Character
             if  plr.Stamina.Value <= minStam then
                 repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat.Text,"/")[2])
             else
-                VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
-                VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
+                if char:FindFirstChild("Meditate") then
+                    for i,v in pairs(keys) do
+                        if v.Visible then
+                            VIM:SendKeyEvent(true,Enum.KeyCode[string.upper(v.Name)],false,game)
+                            VIM:SendKeyEvent(false,Enum.KeyCode[string.upper(v.Name)],false,game)
+                        end
+                    end
+                else
+                    VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
+                    VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
+                end
+                
             end
             wait(1/workspace:GetRealPhysicsFPS())
         end
@@ -175,12 +187,12 @@ local funcs = {
     autoPB = function() -- work obviously
         return
     end,
-    autoEquip = function() -- meditate needs work
+    autoEquip = function()
         while equipToggle do
             local char = plr.Character
             local yes
             yes = supportEquip(toolType)
-            if yes then
+            if yes and not char:FindFirstChild(yes.Name) then
                 char:WaitForChild("Humanoid"):EquipTool(yes)
             end
             wait(1/workspace:GetRealPhysicsFPS())
