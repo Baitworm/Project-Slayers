@@ -11,7 +11,7 @@ getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
-local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(1,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
@@ -119,6 +119,12 @@ local funcs = {
             local char = plr.Character
             local bag = workspace["Punching Bags"]:GetChildren()[bagNum]
             if char:FindFirstChild("Gloves") then
+                local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector * -4})
+                tween:Play()
+                tween.Completed:Wait()
+                if not char:FindFirstChild("Gloves") then 
+                    char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
+                end
                 if not char:FindFirstChild("LeftGloves") then
                     char:FindFirstChild("Gloves"):Activate()
                 end
@@ -128,6 +134,7 @@ local funcs = {
                 if char:FindFirstChild("Combat") and char:FindFirstChild("LeftGloves") then
                     local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector * -4})
                     tween:Play()
+                    tween.Completed:Wait()
                 else
                     gloveCounter = 0
                     for i,v in pairs(workspace.Items:GetDescendants()) do
@@ -145,20 +152,6 @@ local funcs = {
                     end
                 end
             end
-            wait(1/workspace:GetRealPhysicsFPS())
-        end
-    end,
-    autoGang = function() -- work on
-        while gangToggle do
-            local vault = workspace.GangArea.Vault
-            vault.CanCollide = false
-            local char = plr.Character
-            local tween = tweenService:Create(char.HumanoidRootPart,TweenInfo.new(0.3,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0), {CFrame = vault.CFrame})
-            tween:Play()
-            if char:FindFirstChild("Combat") then 
-                print("stuck2")
-                char:FindFirstChild("Combat"):Activate()
-            else print("stuck3") char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Combat")) end 
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
@@ -225,9 +218,6 @@ Tab:AddToggle({
                 if covType == "Money" then
                     questToggle = Value
                     funcs[findFunc("Quest")]()
-                else
-                    gangToggle = Value
-                    funcs[findFunc("Gang")]()
                 end
             end
         end
