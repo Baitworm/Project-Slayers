@@ -21,7 +21,8 @@ local deliv = workspace.Quests.QuestLocations.Delivery
 local cat = workspace.Quests.QuestLocations.Cat
 local briefcase = workspace.Quests.QuestLocations.Briefcase
 local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
-local function supportEquip(tool)
+-- functions
+local function supportEquip(tool) -- function to help find the tool to equip
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool) then
             return v
@@ -29,7 +30,7 @@ local function supportEquip(tool)
     end
     return nil
 end
-local funcs = {
+local funcs = { -- list of functions
     autoQuest = function()
         while questToggle do
             local char = plr.Character or plr.CharacterAdded:Wait()
@@ -190,14 +191,21 @@ local funcs = {
             end
             wait(1/workspace:GetRealPhysicsFPS())
         end
-    end
+    end,
+    delMouse = function()
+        pcall(function()
+            game:GetService("UserInputService").MouseIconEnabled = true
+            game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
+            plr.PlayerGui.MouseGui:Destroy()  
+        end)
+    end,
 }
-function findFunc(name)
+function findFunc(name) -- function to find functions within the table from a string
     for i,v in pairs(funcs) do
         if string.find(i,name) then return i end
     end
 end
-local Window = OrionLib:MakeWindow({Name = "Tatakai V DOGSHIT", HidePremium = true})
+local Window = OrionLib:MakeWindow({Name = "Tatakai V DOGSHIT", HidePremium = true}) -- gui creation
 local Tab = Window:MakeTab({
 	Name = "Farms",
 	Icon = "rbxassetid://4483345998",
@@ -255,12 +263,12 @@ Tab:AddDropdown({
 		toolType = Value
 	end    
 })
-local Tab3 = Window:MakeTab({
-	Name = "Misc",
+local Tab2 = Window:MakeTab({
+    Name = "Mouse/Click",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
-Tab3:AddSlider({
+Tab2:AddSlider({
 	Name = "Minimum Stamina",
 	Min = 0,
 	Max = 1000,
@@ -272,7 +280,26 @@ Tab3:AddSlider({
 		minStam = Value
 	end    
 })
-
+Tab2:AddBind({
+	Name = "Auto Click",
+	Default = Enum.KeyCode.T,
+	Hold = false,
+	Callback = function()
+		clickToggle = not clickToggle
+        funcs[findFunc("Click")]()
+	end    
+})
+Tab2:AddButton({
+	Name = "Fix Mouse",
+	Callback = function()
+        funcs[findFunc("Mouse")]()
+  	end    
+})
+local Tab3 = Window:MakeTab({
+	Name = "Food",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 Tab3:AddToggle({
 	Name = "Auto Eat",
 	Default = false,
@@ -297,17 +324,7 @@ Tab3:AddDropdown({
 		foodName = Value
 	end    
 })
-Tab3:AddBind({
-	Name = "Auto Click",
-	Default = Enum.KeyCode.T,
-	Hold = false,
-	Callback = function()
-		clickToggle = not clickToggle
-        funcs[findFunc("Click")]()
-	end    
-})
-
-plr.CharacterAdded:Connect(function(char)
+plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     wait(6)
     funcs[findFunc("Quest")]()
 end)
