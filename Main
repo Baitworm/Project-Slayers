@@ -199,6 +199,14 @@ local funcs = { -- list of functions
             plr.PlayerGui.MouseGui:Destroy()  
         end)
     end,
+    AntiAFK = function()
+        pcall(function()
+            for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+                v:Disable()
+            end
+        end)
+        
+    end,
 }
 function findFunc(name) -- function to find functions within the table from a string
     for i,v in pairs(funcs) do
@@ -323,6 +331,17 @@ Tab3:AddDropdown({
 	Callback = function(Value)
 		foodName = Value
 	end    
+})
+local Tab4 = Window:MakeTab({
+	Name = "Misc",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+Tab4:AddButton({
+	Name = "Anti AFK",
+	Callback = function()
+        funcs[findFunc("AFK")]()
+  	end    
 })
 plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     wait(6)
