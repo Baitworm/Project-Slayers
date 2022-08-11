@@ -16,6 +16,15 @@ local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
+local foodTable = {}
+for i,v in pairs(workspace.Items:GetDescendants()) do
+    if v.Name == "ImageLabel" then
+        if v.Image == "rbxassetid://10488600050" or v.Image == "rbxassetid://10488602627" then
+            local firstString = string.split(v.Parent.Parent:GetChildren()[1].Name,"$")[1]
+            foodTable[#foodTable+1] = string.sub(firstString,1,string.len(firstString)-1)
+        end
+    end
+end
 local covType,toolType
 local bagNum, gloveCounter
 local deliv = workspace.Quests.QuestLocations.Delivery
@@ -91,7 +100,7 @@ local funcs = { -- list of functions
         end
         
     end,
-    autoEat = function() -- work on 
+    autoEat = function() -- done
         while eatToggle do
             for i,v in pairs(plr.Backpack:GetChildren()) do
                 if v:IsA("Tool") and v.Name == foodName then 
@@ -101,15 +110,10 @@ local funcs = { -- list of functions
                     break;
                 end
             end
-            if foodName == "Chicken" or (string.find(foodName,"Shake"))then
-                wait(32)
-            else
-                wait(600)
-            end 
+            plr.PlayerGui.MainGui.Boosts.ChildRemoved:Wait()
         end
-        
     end,
-    autoBuyFood = function() -- done for now but check chocolate cause these fucks retarded as hell
+    autoBuyFood = function() -- done
         while buyToggle do
             for i,v in pairs(workspace.Items:GetDescendants()) do
                 if string.find(v.Name, foodName) then 
@@ -184,7 +188,7 @@ local funcs = { -- list of functions
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
-    autoClick = function()
+    autoClick = function() -- done
         while clickToggle do
             local char = plr.Character
             if  plr.Stamina.Value <= minStam then
@@ -211,7 +215,7 @@ local funcs = { -- list of functions
     autoPB = function() -- work obviously
         return
     end,
-    autoEquip = function()
+    autoEquip = function() -- done
         while equipToggle do
             local char = plr.Character
             local yes
@@ -222,14 +226,14 @@ local funcs = { -- list of functions
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
-    delMouse = function()
+    delMouse = function() -- done
         pcall(function()
             game:GetService("UserInputService").MouseIconEnabled = true
             game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
             plr.PlayerGui.MouseGui:Destroy()  
         end)
     end,
-    AntiAFK = function()
+    AntiAFK = function() -- done
         pcall(function()
             for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
                 v:Disable()
@@ -357,7 +361,7 @@ Tab3:AddToggle({
 Tab3:AddDropdown({
 	Name = "Food to auto eat/buy",
 	Default = "Chicken",
-	Options = {"Chicken","Burger", "Chocolate Shake","Mango Shake","Strawberry Shake","Ramen"}, -- work on meditate
+	Options = foodTable,
 	Callback = function(Value)
 		foodName = Value
 	end    
