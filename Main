@@ -11,6 +11,7 @@ getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
+local tweenService = game:GetService("TweenService")
 local PathfindingService = game:GetService("PathfindingService")
 local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -25,6 +26,7 @@ for i,v in pairs(workspace.Items:GetDescendants()) do
         end
     end
 end
+local territoryIndex =1
 local covType,toolType
 local bagNum, gloveCounter
 local deliv = workspace.Quests.QuestLocations.Delivery
@@ -42,7 +44,11 @@ local function supportEquip(tool) -- function to help find the tool to equip
     end
     return nil
 end
-
+local function gangFinder(char)
+    for i,v in pairs(char:GetChildren()) do
+        if v:IsA("Model") then return v.Name end
+    end
+end
 local funcs = { -- list of functions
     autoQuest = function() -- done
         while questToggle do
@@ -203,11 +209,14 @@ local funcs = { -- list of functions
                     end
                 else
                     if char:FindFirstChild("Gloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
-                    if covType == "Gloves" then if not char:FindFirstChild("LeftGloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
+                    if covType == "Gloves" then 
+                        if not char:FindFirstChild("LeftGloves") then 
+                            wait(1/workspace:GetRealPhysicsFPS()) continue 
+                        end
+                    end
                     VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
                     VIM:SendMouseButtonEvent(1, 1, 0, false, game, 1)
                 end
-            end
                 wait(1/workspace:GetRealPhysicsFPS())
             end
         end
@@ -241,6 +250,28 @@ local funcs = { -- list of functions
         end)
         
     end,
+    autoGang = function()
+        while gangToggle do
+            local char = plr.Character
+            for i,v in pairs(workspace.Territories:GetChildren()) do
+                repeat
+                    local success,error = pcall(function()
+                        path:ComputeAsync(char.HumanoidRootPart.Position, workspace.Territories:GetChildren()[territoryIndex].Center.Position)
+                    end)
+                    if success then
+                        for _,g in ipairs(path:GetWaypoints()) do
+                            local tweenInfo = TweenInfo.new(0.2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+                            local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{Position = g.Position + Vector3.new(0,5,0)})
+                            tween:Play()
+                            tween.Completed:Wait()
+                        end
+                    end 
+                    wait(1/workspace:GetRealPhysicsFPS())
+                until v.Owner.Value == gangFinder(char)
+            end
+            wait(1/workspace:GetRealPhysicsFPS())
+        end
+    end,
 }
 function findFunc(name) -- function to find functions within the table from a string
     for i,v in pairs(funcs) do
@@ -268,6 +299,11 @@ Tab:AddToggle({
                 if covType == "Money" then
                     questToggle = Value
                     funcs[findFunc("Quest")]()
+                else
+                    if covType == "Gang" then
+                        gangToggle = Value
+                        funcs[findFunc("Gang")]()
+                    end
                 end
             end
         end
@@ -276,7 +312,7 @@ Tab:AddToggle({
 Tab:AddDropdown({
 	Name = "Type",
 	Default = "Pullups",
-	Options = {"Pullups","Gloves", "Money",},
+	Options = {"Pullups","Gloves", "Money","Gang"},
 	Callback = function(Value)
 		covType = Value
 	end    
