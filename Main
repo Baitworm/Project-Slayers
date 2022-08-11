@@ -234,7 +234,6 @@ local funcs = { -- list of functions
                     local angle = 45
                     if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= radius then
                         local dot = (yourHuman.Head.Position - otherHuman.HumanoidRootPart.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
-                        print(dot)
                         if dot >= (-math.cos(math.rad(angle))) -1 and dot <= math.cos(math.rad(angle)) + 1 then
                             local args = {
                                 [1] = "Block",
@@ -243,7 +242,7 @@ local funcs = { -- list of functions
                             }
 
                             game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                            wait(0.1)
+                            wait()
                             args = {
                                 [1] = "Block",
                                 [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
