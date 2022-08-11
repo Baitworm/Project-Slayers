@@ -43,14 +43,8 @@ local function supportEquip(tool) -- function to help find the tool to equip
     end
     return nil
 end
-local function gangFinder(char)
-    for i,v in pairs(char:GetChildren()) do
-        if v:IsA("Model") then return v.Name end
-    end
-end
 -- tables
 local PBConnections = {}
-
 local funcs = { -- list of functions
     autoQuest = function() -- done
         while questToggle do
@@ -228,21 +222,20 @@ local funcs = { -- list of functions
             end
         end
     end,
-    autoPB = function() -- work obviously
+    autoPB = function() -- done
         if PBToggle then
             for i,v in pairs(game:GetService("Players"):GetChildren()) do
                 if v == plr then continue end
                 PBConnections[v:FindFirstChild("Combo")] = v.Combo.Changed:Connect(function()
+                    if v.Combo.Value == 1 then return end
                     local yourHuman = v.Character
                     local otherHuman = plr.Character -- variable names flipped due to laziness
-                    local radius = 7
+                    local radius = 12
                     local angle = 45
                     if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= radius then
-                        print("work")
-                        local dot = yourHuman.Humanoid.Position:Dot(otherHuman.HumanoidRootPart.Position)
+                        local dot = (yourHuman.Head.Position - otherHuman.HumanoidRootPart.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
                         print(dot)
-                        if dot >= 0 and dot <= math.cos(math.rad(angle)) then
-                            print("hey")
+                        if dot >= (-math.cos(math.rad(angle))) -1 and dot <= math.cos(math.rad(angle)) + 1 then
                             local args = {
                                 [1] = "Block",
                                 [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
