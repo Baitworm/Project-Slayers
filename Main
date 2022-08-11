@@ -211,7 +211,8 @@ local funcs = { -- list of functions
                     if char:FindFirstChild("Gloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
                     if covType == "Gloves" then 
                         if not char:FindFirstChild("LeftGloves") then 
-                            wait(1/workspace:GetRealPhysicsFPS()) continue 
+                            wait(1/workspace:GetRealPhysicsFPS()) 
+                            continue 
                         end
                     end
                     VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
