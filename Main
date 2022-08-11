@@ -209,7 +209,7 @@ local funcs = { -- list of functions
                     end
                 else
                     if char:FindFirstChild("Gloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
-                    if covType == "Gloves" then 
+                    if covType == "Gloves" and not equipToggle then 
                         if not char:FindFirstChild("LeftGloves") then 
                             wait(1/workspace:GetRealPhysicsFPS()) 
                             continue 
