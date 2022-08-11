@@ -11,7 +11,8 @@ getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
-local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(2,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+local PathfindingService = game:GetService("PathfindingService")
+local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
@@ -24,14 +25,17 @@ local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
 -- functions
 local function supportEquip(tool) -- function to help find the tool to equip
     for i,v in pairs(plr.Backpack:GetChildren()) do
-        if string.find(v.Name,tool) then
-            return v
+        if string.find(v.Name,tool,1,true) then
+            if string.find(v.Name,tool,1,true) == 1 then
+               return v 
+            end
         end
     end
     return nil
 end
+
 local funcs = { -- list of functions
-    autoQuest = function()
+    autoQuest = function() -- done
         while questToggle do
             local char = plr.Character or plr.CharacterAdded:Wait()
             local quest = char:FindFirstChild("Quest")
@@ -40,19 +44,19 @@ local funcs = { -- list of functions
                     local loc =  quest.Location.Value
                     if quest.PlayerQuest.Value == "Briefcase" then
                         local case = briefcase:FindFirstChild(tostring(loc)).Case
-                        local cd = briefcase:FindFirstChild(tostring(loc)).ClickDetector
+                        local pp = briefcase:FindFirstChild(tostring(loc)).ProximityPrompt
                         repeat 
                             char.HumanoidRootPart.CFrame = case.CFrame 
-                            fireclickdetector(cd,32)
+                            fireproximityprompt(pp,32)
                             wait()
                         until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                     else
                         if quest.PlayerQuest.Value == "Cat" then
                             local place = cat[tostring(loc)]
-                            local cd = place.ClickDetector
+                            local pp = place.ProximityPrompt
                             repeat 
                                 char.HumanoidRootPart.CFrame = place.CFrame 
-                                fireclickdetector(cd,32)
+                                fireproximityprompt(pp,10)
                                 wait()
                             until char:FindFirstChild("Quest") == nil or quest.Objective.Value
                         else
@@ -78,16 +82,16 @@ local funcs = { -- list of functions
             wait()
         end
     end,
-    autoDura = function()
+    autoDura = function() -- done
         while duraToggle do
             for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
-                fireclickdetector(v.ClickDetector,5)
+                fireproximityprompt(v.Main.ProximityPrompt,5)
             end  
             wait(1/workspace:GetRealPhysicsFPS())
         end
         
     end,
-    autoEat = function()
+    autoEat = function() -- work on 
         while eatToggle do
             for i,v in pairs(plr.Backpack:GetChildren()) do
                 if v:IsA("Tool") and v.Name == foodName then 
@@ -105,24 +109,46 @@ local funcs = { -- list of functions
         end
         
     end,
-    autoBuyFood = function()
+    autoBuyFood = function() -- done for now but check chocolate cause these fucks retarded as hell
         while buyToggle do
             for i,v in pairs(workspace.Items:GetDescendants()) do
                 if string.find(v.Name, foodName) then 
-                    fireclickdetector(v.Parent.ClickDetector,12)
+                    fireproximityprompt(v.Head.ProximityPrompt,12)
                 end
             end
             wait(1/workspace:GetRealPhysicsFPS())
         end
     end,
-    autoGloves = function()
+    autoGloves = function() -- done
         while gloveToggle do
             local char = plr.Character
             local bag = workspace["Punching Bags"]:GetChildren()[bagNum]
-            if char:FindFirstChild("Gloves") then
-                local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector * -4})
-                tween:Play()
-                tween.Completed:Wait()
+            if char:FindFirstChild("LeftGloves") then
+                wait(1/workspace:GetRealPhysicsFPS())
+                continue
+            else
+                if char:FindFirstChild("Combat") then
+                    char.Humanoid:UnequipTools()
+                end
+            end
+            if char:FindFirstChild(foodName) and char:FindFirstChild("LeftGloves") then
+                char.Humanoid:UnequipTools()
+                char.Humanoid:EquipTool(plr.Backpack.Combat)
+            end
+            if plr.Backpack:FindFirstChild("Gloves") then
+                -- walk
+                local success,error = pcall(function()
+                    path:ComputeAsync(char.HumanoidRootPart.Position, bag.HumanoidRootPart.Position)
+                end)
+                if success then
+                    for i,v in ipairs(path:GetWaypoints()) do
+                        if v.Action == Enum.PathWaypointAction.Jump then
+                            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        end
+                        char.Humanoid:MoveTo(v.Position)
+                        char.Humanoid.MoveToFinished:Wait()
+                    end
+                end
                 if not char:FindFirstChild("Gloves") then 
                     char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
                 end
@@ -132,23 +158,25 @@ local funcs = { -- list of functions
                 char.Humanoid:UnequipTools()
                 char.Humanoid:EquipTool(plr.Backpack.Combat)
             else
-                if char:FindFirstChild("Combat") and char:FindFirstChild("LeftGloves") then
-                    local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = bag.HumanoidRootPart.CFrame + bag.HumanoidRootPart.CFrame.LookVector * -4})
-                    tween:Play()
-                    tween.Completed:Wait()
-                else
-                    gloveCounter = 0
-                    for i,v in pairs(workspace.Items:GetDescendants()) do
-                        if v.Name == "Gloves $75" then
-                            if gloveCounter == 0 then
-                                gloveCounter = gloveCounter + 1
-                            else
-                                local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo, {CFrame = v:GetModelCFrame()})
-                                tween:Play()
-                                tween.Completed:Wait()
-                                fireclickdetector(v.Parent.ClickDetector,5)
-                                char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
+                gloveCounter = 0
+                for i,v in pairs(workspace.Items:GetDescendants()) do
+                    if v.Name == "Gloves $75" then
+                        if gloveCounter == 0 then
+                            gloveCounter = gloveCounter + 1
+                        else
+                            local success,error = pcall(function()
+                                path:ComputeAsync(char.HumanoidRootPart.Position, v.Head.Position)
+                            end)
+                            if success then
+                                for i,v in ipairs(path:GetWaypoints()) do
+                                    if v.Action == Enum.PathWaypointAction.Jump then
+                                        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                                    end
+                                    char.Humanoid:MoveTo(v.Position)
+                                    char.Humanoid.MoveToFinished:Wait()
+                                end
                             end
+                            fireproximityprompt(v.Head.ProximityPrompt,12)
                         end
                     end
                 end
@@ -170,12 +198,14 @@ local funcs = { -- list of functions
                         end
                     end
                 else
-                    VIM:SendMouseButtonEvent(900, 400, 0, true, game, 1)
-                    VIM:SendMouseButtonEvent(900, 400, 0, false, game, 1)
+                    if char:FindFirstChild("Gloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
+                    if covType == "Gloves" then if not char:FindFirstChild("LeftGloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
+                    VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
+                    VIM:SendMouseButtonEvent(1, 1, 0, false, game, 1)
                 end
-                
             end
-            wait(1/workspace:GetRealPhysicsFPS())
+                wait(1/workspace:GetRealPhysicsFPS())
+            end
         end
     end,
     autoPB = function() -- work obviously
@@ -242,7 +272,7 @@ Tab:AddToggle({
 Tab:AddDropdown({
 	Name = "Type",
 	Default = "Pullups",
-	Options = {"Pullups","Gloves", "Money","Gangbase",},
+	Options = {"Pullups","Gloves", "Money",},
 	Callback = function(Value)
 		covType = Value
 	end    
@@ -250,7 +280,7 @@ Tab:AddDropdown({
 Tab:AddDropdown({
 	Name = "Bag Select (ignore if not doing bags)",
 	Default = 1,
-	Options = {1,2,3,4,5,6},
+	Options = {1,2,3,4,5,6,7,8},
 	Callback = function(Value)
 		bagNum = Value
 	end    
@@ -266,7 +296,7 @@ Tab:AddToggle({
 Tab:AddDropdown({
 	Name = "Tool",
 	Default = "Squat",
-	Options = {"Squat","Situp", "Pushup","Meditate","Jumping Rope","20 KG Dumbbell","50 KG Dumbbell","100 KG Dumbbell","200 KG Dumbbell"}, -- work on meditate
+	Options = {"Squat","Situp", "Pushup","Meditate","Jumping Rope","20 KG Dumbbell","50 KG Dumbbell","100 KG Dumbbell","200 KG Dumbbell","One-Hand", "Handstand","Burpee"},
 	Callback = function(Value)
 		toolType = Value
 	end    
@@ -347,5 +377,4 @@ plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     wait(6)
     funcs[findFunc("Quest")]()
 end)
-
 OrionLib:Init()
