@@ -375,8 +375,9 @@ Tab2:AddBind({
 	Callback = function()
 		clickToggle = not clickToggle
         funcs[findFunc("Click")]()
+        local title = "Auto Click", clickToggle
         OrionLib:MakeNotification({
-            Name = "Auto Click",
+            Name = title,
             Content = "KADO A BITCH AND A HALF NO CAP",
             Image = "rbxassetid://4483345998",
             Time = 10
