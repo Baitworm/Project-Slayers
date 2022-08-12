@@ -375,6 +375,12 @@ Tab2:AddBind({
 	Callback = function()
 		clickToggle = not clickToggle
         funcs[findFunc("Click")]()
+        OrionLib:MakeNotification({
+            Name = "Auto Click",
+            Content = "KADO A BITCH AND A HALF NO CAP",
+            Image = "rbxassetid://4483345998",
+            Time = 10
+        })
 	end    
 })
 Tab2:AddButton({
@@ -429,6 +435,12 @@ Tab4:AddButton({
 	Name = "Anti AFK",
 	Callback = function()
         funcs[findFunc("AFK")]()
+        OrionLib:MakeNotification({
+            Name = "Anti AFK",
+            Content = "YOU FUCKING SUCK KADO SUCK MY DICK YOU STUPID FAGGOT ACTUALLY",
+            Image = "rbxassetid://4483345998",
+            Time = 10
+        })
   	end    
 })
 plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
