@@ -374,14 +374,14 @@ Tab2:AddBind({
 	Hold = false,
 	Callback = function()
 		clickToggle = not clickToggle
-        funcs[findFunc("Click")]()
-        local title = "Auto Click", clickToggle
+        local title = "Auto Click" .. " " .. tostring(clickToggle)
         OrionLib:MakeNotification({
             Name = title,
             Content = "KADO A BITCH AND A HALF NO CAP",
             Image = "rbxassetid://4483345998",
             Time = 10
         })
+        funcs[findFunc("Click")]()
 	end    
 })
 Tab2:AddButton({
