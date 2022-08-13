@@ -222,7 +222,7 @@ local funcs = { -- list of functions
             end
         end
     end,
-    autoPB = function() -- done
+    autoPB = function() -- work on
         if PBToggle then
             for i,v in pairs(game:GetService("Players"):GetChildren()) do
                 if v == plr then continue end
@@ -235,6 +235,7 @@ local funcs = { -- list of functions
                     if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= radius then
                         local dot = (yourHuman.Head.Position - otherHuman.HumanoidRootPart.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
                         if dot >= (-math.cos(math.rad(angle))) -1 and dot <= math.cos(math.rad(angle)) + 1 then
+                            wait(0.05)
                             local args = {
                                 [1] = "Block",
                                 [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
@@ -242,7 +243,7 @@ local funcs = { -- list of functions
                             }
 
                             game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                            wait(0.1)
+                            wait(0.05)
                             args = {
                                 [1] = "Block",
                                 [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
