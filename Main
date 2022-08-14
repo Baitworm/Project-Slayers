@@ -281,16 +281,16 @@ local funcs = { -- list of functions
                     if v.Combo.Value == 1 then return end
                     local yourHuman = v.Character
                     local otherHuman = plr.Character -- variable names flipped due to laziness
-                    if (yourHuman.Head.Position - otherHuman.Head.Position).Magnitude <= pbRadius then
+                    if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= tonumber(pbRadius) then
                         local dot = (yourHuman.Head.Position - otherHuman.Head.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
                         if dot >= (-math.cos(math.rad(pbAngle))) -1 and dot <= math.cos(math.rad(pbAngle)) + 1 then
                             local style = findStyle(v)
-                            if style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
+                            if style == "Basic" or style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
                                 delay(0.2,function()
                                     block()
                                 end)
                             else
-                                if style == "Sumo" or style == "Basic" or style == "Leg" then
+                                if style == "Sumo" or style == "Leg" then
                                     delay(0.3,function()
                                         block()
                                     end)
