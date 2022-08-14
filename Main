@@ -17,6 +17,14 @@ local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local minStam
 local foodName
+local covType,toolType
+local bagNum, gloveCounter
+local deliv = workspace.Quests.QuestLocations.Delivery
+local cat = workspace.Quests.QuestLocations.Cat
+local briefcase = workspace.Quests.QuestLocations.Briefcase
+local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
+local pbRadius,pbAngle
+-- tables
 local foodTable = {}
 for i,v in pairs(workspace.Items:GetDescendants()) do
     if v.Name == "ImageLabel" then
@@ -26,12 +34,26 @@ for i,v in pairs(workspace.Items:GetDescendants()) do
         end
     end
 end
-local covType,toolType
-local bagNum, gloveCounter
-local deliv = workspace.Quests.QuestLocations.Delivery
-local cat = workspace.Quests.QuestLocations.Cat
-local briefcase = workspace.Quests.QuestLocations.Briefcase
-local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
+local PBConnections = {}
+local styleIdles = {
+    Sumo = "rbxassetid://5650663387",
+    Hitman = "rbxassetid://6527845323",
+    Formless = "rbxassetid://8365652669",
+    Shadow = "rbxassetid://10391318142",
+    Wrestling = "rbxassetid://6337784130",
+    Neji = "rbxassetid://5717759261",
+    Leg = "rbxassetid://5293891962",
+    LightFeather = "rbxassetid://10455623528",
+    Muay = "rbxassetid://6340761251",
+    Basic = "rbxassetid://10391318142",
+    Boxing = "rbxassetid://5292922704",
+    Karate = "rbxassetid://5757171053",
+    RTKD = "rbxassetid://6068983753",
+    Striker = "rbxassetid://7151923743",
+    MasteredKarate = "rbxassetid://6723474934",
+    Beast = "rbxassetid://6446460446",
+    Sword = "rbxassetid://6379981122",
+}
 -- functions
 local function supportEquip(tool) -- function to help find the tool to equip
     for i,v in pairs(plr.Backpack:GetChildren()) do
@@ -43,8 +65,38 @@ local function supportEquip(tool) -- function to help find the tool to equip
     end
     return nil
 end
--- tables
-local PBConnections = {}
+local function getKeyFromIdles(value) -- help findStyle function get the key/style of the idle it found
+    local style
+    for i,v in pairs(styleIdles) do
+        if v == value then
+            style = i
+        end
+    end
+    return style
+end
+local function findStyle(player) -- support auto pb to figure out length to wait before blocking
+    local char = player.Character
+    for i,v in pairs(char.Humanoid.Animator:GetPlayingAnimationTracks()) do
+        if getKeyFromIdles(v.Animation.AnimationId) then
+            return getKeyFromIdles(v.Animation.AnimationId)
+        end
+    end
+end
+local function block() -- auto block feature used in autoPB
+    local args = {
+        [1] = "Block",
+        [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
+        [3] = true
+    }
+    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+    wait(0.1) -- default wait to block just in case :D
+    args = {
+        [1] = "Block",
+        [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
+        [3] = false
+    }
+    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+end
 local funcs = { -- list of functions
     autoQuest = function() -- done
         while questToggle do
@@ -230,27 +282,27 @@ local funcs = { -- list of functions
                     if v.Combo.Value == 1 then return end
                     local yourHuman = v.Character
                     local otherHuman = plr.Character -- variable names flipped due to laziness
-                    local radius = 12
-                    local angle = 45
-                    if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= radius then
-                        local dot = (yourHuman.Head.Position - otherHuman.HumanoidRootPart.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
-                        if dot >= (-math.cos(math.rad(angle))) -1 and dot <= math.cos(math.rad(angle)) + 1 then
-                            wait(0.05)
-                            local args = {
-                                [1] = "Block",
-                                [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
-                                [3] = true
-                            }
-
-                            game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                            wait(0.05)
-                            args = {
-                                [1] = "Block",
-                                [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
-                                [3] = false
-                            }
-
-                            game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
+                    if (yourHuman.Head.Position - otherHuman.Head.Position).Magnitude <= pbRadius then
+                        local dot = (yourHuman.Head.Position - otherHuman.Head.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
+                        if dot >= (-math.cos(math.rad(pbAngle))) -1 and dot <= math.cos(math.rad(pbAngle)) + 1 then
+                            local style = findStyle(v)
+                            if style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
+                                delay(0.2,function()
+                                    block()
+                                end)
+                            else
+                                if style == "Sumo" or style == "Basic" or style == "Leg" then
+                                    delay(0.3,function()
+                                        block()
+                                    end)
+                                else
+                                    if style == "RTKD" or style == "Neji" or style == "Formless" then
+                                        delay(0.1,function()
+                                            block()
+                                        end)
+                                    end
+                                end -- breaks if game is running too long lmao
+                            end
                         end
                     end
                 end)
@@ -260,7 +312,6 @@ local funcs = { -- list of functions
                 v:Disconnect()
             end
         end
-        
     end,
     autoEquip = function() -- done
         while equipToggle do
@@ -289,7 +340,7 @@ local funcs = { -- list of functions
         
     end,
 }
-function findFunc(name) -- function to find functions within the table from a string
+local function findFunc(name) -- function to find functions within the table from a string
     for i,v in pairs(funcs) do
         if string.find(i,name) then return i end
     end
@@ -432,6 +483,30 @@ Tab4:AddToggle({
         PBToggle = Value
         funcs[findFunc("PB")]()
     end
+})
+Tab4:AddSlider({
+	Name = "Auto PB Range",
+	Min = 5,
+	Max = 20,
+	Default = 12,
+	Color = Color3.fromRGB(89, 0, 255),
+	Increment = .5,
+	ValueName = "",
+	Callback = function(Value)
+		pbRadius = Value
+	end    
+})
+Tab4:AddSlider({
+	Name = "Auto PB Range",
+	Min = 0,
+	Max = 180,
+	Default = 12,
+	Color = Color3.fromRGB(89, 0, 255),
+	Increment = .5,
+	ValueName = "",
+	Callback = function(Value)
+		pbAngle = Value
+	end    
 })
 Tab4:AddButton({
 	Name = "Anti AFK",
