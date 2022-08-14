@@ -155,7 +155,7 @@ local funcs = { -- list of functions
             wait()
         end
     end,
-    autoDeposit = function()
+    autoDeposit = function() -- check but prob works
         depositConnection = plr.PlayerGui.MainGui.Cash.Changed:Connect(function()
             local guiThing = plr.PlayerGui.MainGui
             local number = stringCombineToNumber(guiThing.Cash.Text)
@@ -304,7 +304,7 @@ local funcs = { -- list of functions
             end
         end
     end,
-    autoPB = function() -- work on
+    autoPB = function() -- done
         if PBToggle then
             for i,v in pairs(game:GetService("Players"):GetChildren()) do
                 if v == plr then continue end
