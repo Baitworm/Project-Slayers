@@ -11,7 +11,6 @@ getgenv().equipToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
-local tweenService = game:GetService("TweenService")
 local PathfindingService = game:GetService("PathfindingService")
 local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -497,7 +496,7 @@ Tab4:AddSlider({
 	end    
 })
 Tab4:AddSlider({
-	Name = "Auto PB Range",
+	Name = "Auto PB Angle (from where they're looking)",
 	Min = 0,
 	Max = 180,
 	Default = 12,
