@@ -499,7 +499,7 @@ Tab4:AddSlider({
 	Name = "Auto PB Angle (from where they're looking)",
 	Min = 0,
 	Max = 180,
-	Default = 12,
+	Default = 45,
 	Color = Color3.fromRGB(89, 0, 255),
 	Increment = .5,
 	ValueName = "",
