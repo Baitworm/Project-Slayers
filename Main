@@ -8,6 +8,7 @@ getgenv().buyToggle = false
 getgenv().gloveToggle = false
 getgenv().PBToggle = false
 getgenv().equipToggle = false
+getgenv().depositToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
@@ -23,6 +24,7 @@ local cat = workspace.Quests.QuestLocations.Cat
 local briefcase = workspace.Quests.QuestLocations.Briefcase
 local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
 local pbRadius,pbAngle
+local depositConnection
 -- tables
 local foodTable = {}
 for i,v in pairs(workspace.Items:GetDescendants()) do
@@ -96,6 +98,15 @@ local function block() -- auto block feature used in autoPB
     }
     game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
 end
+local function stringCombineToNumber(str)
+    local guiThing = plr.PlayerGui.MainGui
+    local table = string.split(string.sub(str,2),",")
+    local number = tonumber(table[1])
+    if #table > 1 then
+        number = tonumber(number..table[2])
+    end
+    return number
+end
 local funcs = { -- list of functions
     autoQuest = function() -- done
         while questToggle do
@@ -143,6 +154,26 @@ local funcs = { -- list of functions
             end
             wait()
         end
+    end,
+    autoDeposit = function()
+        depositConnection = plr.PlayerGui.MainGui.Cash.Changed:Connect(function()
+            local guiThing = plr.PlayerGui.MainGui
+            local number = stringCombineToNumber(guiThing.Cash.Text)
+            local bankNumber = stringCombineToNumber(guiThing.Bank.Cash.Text)
+            local moneyToDeposit = number
+            if (number + bankNumber) > 300000 then
+                moneyToDeposit = 300000 - bankNumber
+            else
+                if bankNumber >= 300000 then
+                    moneyToDeposit =0
+                end
+            end
+            local args = {
+            [1] = "Deposit",
+            [2] = moneyToDeposit
+            }
+            game:GetService("ReplicatedStorage").Bank:InvokeServer(unpack(args))
+        end)
     end,
     autoDura = function() -- done
         while duraToggle do
@@ -387,6 +418,14 @@ Tab:AddDropdown({
 	end    
 })
 Tab:AddToggle({
+	Name = "Auto Deposit",
+	Default = false,
+	Callback = function(Value)
+        depositToggle = Value
+        funcs[findFunc("Deposit")]()
+    end
+})
+Tab:AddToggle({
 	Name = "Tool Grind",
 	Default = false,
 	Callback = function(Value)
@@ -480,6 +519,14 @@ Tab4:AddToggle({
     Default = false,
     Callback = function(Value)
         PBToggle = Value
+        if not PBToggle then
+            OrionLib:MakeNotification({
+                Name = "W GAME",
+                Content = "games so bad that half the time animations aren't loaded so if it dont work prob that's why",
+                Image = "rbxassetid://4483345998",
+                Time = 7
+            })
+        end
         funcs[findFunc("PB")]()
     end
 })
