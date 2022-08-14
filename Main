@@ -26,15 +26,6 @@ local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
 local pbRadius,pbAngle
 local depositConnection
 -- tables
-local foodTable = {}
-for i,v in pairs(workspace.Items:GetDescendants()) do
-    if v.Name == "ImageLabel" then
-        if v.Image == "rbxassetid://10488600050" or v.Image == "rbxassetid://10488602627" then
-            local firstString = string.split(v.Parent.Parent:GetChildren()[1].Name,"$")[1]
-            foodTable[#foodTable+1] = string.sub(firstString,1,string.len(firstString)-1)
-        end
-    end
-end
 local PBConnections = {}
 local styleIdles = {
     Sumo = "rbxassetid://5650663387",
@@ -56,6 +47,7 @@ local styleIdles = {
     Sword = "rbxassetid://6379981122",
 }
 -- functions
+
 local function supportEquip(tool) -- function to help find the tool to equip
     for i,v in pairs(plr.Backpack:GetChildren()) do
         if string.find(v.Name,tool,1,true) then
@@ -387,7 +379,7 @@ local Tab = Window:MakeTab({
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
-Tab:AddToggle({
+Tab:AddToggle({ -- Toggle for non tool trainings
 	Name = "Coventional Grind",
 	Default = false,
 	Callback = function(Value)
@@ -496,6 +488,12 @@ Tab3:AddToggle({
 	Default = false,
 	Callback = function(Value)
 	    eatToggle = Value
+        OrionLib:MakeNotification({
+            Name = "Bro.",
+            Content = "WHICH FUCKING RETARD WANTS TO EAT ANYTHING ASIDE FROM RAMEN, BURGER OR PROTEIN",
+            Image = "rbxassetid://4483345998",
+            Time = 10
+        })
         funcs[findFunc("Eat")]()
     end
 })
@@ -504,13 +502,19 @@ Tab3:AddToggle({
     Default = false,
     Callback = function(Value)
         buyToggle = Value
+        OrionLib:MakeNotification({
+            Name = "DIE U A WHOLE ASS BITCH",
+            Content = "I BET U FUCK BLOCKS OF CHEESE EVERYDAY U MANWHORE",
+            Image = "rbxassetid://4483345998",
+            Time = 10
+        })
         funcs[findFunc("Buy")]()
     end
 })
 Tab3:AddDropdown({
 	Name = "Food to auto eat/buy",
-	Default = "Chicken",
-	Options = foodTable,
+	Default = "Protein Shake",
+	Options = {"Protein Shake","Burger","Ramen"},
 	Callback = function(Value)
 		foodName = Value
 	end    
