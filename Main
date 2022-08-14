@@ -156,24 +156,30 @@ local funcs = { -- list of functions
         end
     end,
     autoDeposit = function() -- check but prob works
-        depositConnection = plr.PlayerGui.MainGui.Cash.Changed:Connect(function()
-            local guiThing = plr.PlayerGui.MainGui
-            local number = stringCombineToNumber(guiThing.Cash.Text)
-            local bankNumber = stringCombineToNumber(guiThing.Bank.Cash.Text)
-            local moneyToDeposit = number
-            if (number + bankNumber) > 300000 then
-                moneyToDeposit = 300000 - bankNumber
-            else
-                if bankNumber >= 300000 then
-                    moneyToDeposit =0
+        if depositToggle then
+            depositConnection = plr.PlayerGui.MainGui.Cash.Changed:Connect(function()
+                local guiThing = plr.PlayerGui.MainGui
+                local number = stringCombineToNumber(guiThing.Cash.Text)
+                local bankNumber = stringCombineToNumber(guiThing.Bank.Cash.Text)
+                local moneyToDeposit = number
+                if (number + bankNumber) > 300000 then
+                    moneyToDeposit = 300000 - bankNumber
+                else
+                    if bankNumber >= 300000 then
+                        moneyToDeposit =0
+                    end
                 end
+                local args = {
+                [1] = "Deposit",
+                [2] = moneyToDeposit
+                }
+                game:GetService("ReplicatedStorage").Bank:InvokeServer(unpack(args))
+            end)    
+        else
+            if depositConnection ~= nil then
+                depositConnection:Disconnect()
             end
-            local args = {
-            [1] = "Deposit",
-            [2] = moneyToDeposit
-            }
-            game:GetService("ReplicatedStorage").Bank:InvokeServer(unpack(args))
-        end)
+        end
     end,
     autoDura = function() -- done
         while duraToggle do
