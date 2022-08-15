@@ -12,6 +12,7 @@ getgenv().depositToggle = false
 -- variables
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
+local CS = game:GetService("CollectionService")
 local PathfindingService = game:GetService("PathfindingService")
 local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
@@ -46,6 +47,7 @@ local styleIdles = {
     Beast = "rbxassetid://6446460446",
     Sword = "rbxassetid://6379981122",
 }
+local playerStyles = {}
 -- functions
 
 local function supportEquip(tool) -- function to help find the tool to equip
@@ -98,6 +100,34 @@ local function stringCombineToNumber(str)
         number = tonumber(number..table[2])
     end
     return number
+end
+local function findAnims(hum)
+    for i,v in pairs(hum.Animator:GetPlayingAnimationTracks()) do
+        print(i,v.IsPlaying)
+    end
+end
+local function blockLength(style) -- depending on styles waits that long
+    if style == "Basic" or style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
+        delay(0.2,function()
+            block()
+        end)
+    else
+        if style == "Sumo" or style == "Leg" then
+            delay(0.3,function()
+                block()
+            end)
+        else
+            if style == "RTKD" or style == "Neji" or style == "Formless" then
+                delay(0.1,function()
+                    block()
+                end)
+            else
+                delay(0.2,function()
+                    block()
+                end)
+            end
+        end
+    end
 end
 local funcs = { -- list of functions
     autoQuest = function() -- done
@@ -311,26 +341,14 @@ local funcs = { -- list of functions
                     local yourHuman = v.Character
                     local otherHuman = plr.Character -- variable names flipped due to laziness
                     if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= tonumber(pbRadius) then
-                        local dot = (yourHuman.Head.Position - otherHuman.Head.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
-                        if dot >= (-math.cos(math.rad(pbAngle))) -1 and dot <= math.cos(math.rad(pbAngle)) + 1 then
+                        local dot = (otherHuman.Head.Position - yourHuman.Head.Position).Unit:Dot(yourHuman.Head.CFrame.LookVector)
+                        if dot >= (-1 * (math.cos(math.rad(pbAngle)))) -1 and dot <= math.cos(math.rad(pbAngle)) + 1 then
                             local style = findStyle(v)
-                            if style == "Basic" or style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
-                                delay(0.2,function()
-                                    block()
-                                end)
-                            else
-                                if style == "Sumo" or style == "Leg" then
-                                    delay(0.3,function()
-                                        block()
-                                    end)
-                                else
-                                    if style == "RTKD" or style == "Neji" or style == "Formless" then
-                                        delay(0.1,function()
-                                            block()
-                                        end)
-                                    end
-                                end -- breaks if game is running too long lmao
+                            if style == nil then
+                                style = playerStyles[v.Name]
                             end
+                            print(style)
+                            blockLength(style)
                         end
                     end
                 end)
@@ -580,4 +598,43 @@ plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     wait(6)
     funcs[findFunc("Quest")]()
 end)
+-- random events :D
+game:GetService("Players").PlayerAdded:Connect(function(player) -- event to help auto PB / for new people who join the server
+    CS:AddTag(player,"tagged")
+    player.CharacterAdded:Connect(function(char)
+        char.ChildAdded:Connect(function(child)
+            if child.Name == "Combat" then            
+                playerStyles[player.Name] = findStyle(player)
+            end
+        end)
+    end)
+end)
+for i,v in pairs(game:GetService("Players"):GetChildren()) do
+    if v.Name ~= plr.Name and not CS:HasTag(v,"tagged") then
+        if plr.Character then
+            local connection
+            connection = plr.Character.ChildAdded:Connect(function(child)
+                if child.Name == "Combat" then
+                    playerStyles[v.Name] = findStyle(v)
+                    connection:Disconnect()
+                end
+            end)
+            plr.CharacterAdded:Connect(function(char)
+                char.ChildAdded:Connect(function(child)
+                    if child.Name == "Combat" then
+                        playerStyles[v.Name] = findStyle(v)
+                    end
+                end)
+            end)
+        else
+            plr.CharacterAdded:Connect(function(char)
+                char.ChildAdded:Connect(function(child)
+                    if child.Name == "Combat" then
+                        playerStyles[v.Name] = findStyle(v)
+                    end
+                end)
+            end)
+        end
+    end
+end
 OrionLib:Init()
