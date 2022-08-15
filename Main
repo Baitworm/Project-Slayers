@@ -573,7 +573,7 @@ Tab4:AddSlider({
 Tab4:AddSlider({
 	Name = "Auto PB Angle (from where they're looking)",
 	Min = 0,
-	Max = 180,
+	Max = 135,
 	Default = 45,
 	Color = Color3.fromRGB(89, 0, 255),
 	Increment = .5,
@@ -599,7 +599,7 @@ plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     funcs[findFunc("Quest")]()
 end)
 -- random events :D
-game:GetService("Players").PlayerAdded:Connect(function(player) -- event to help auto PB / for new people who join the server
+game:GetService("Players").PlayerAdded:Connect(function(player) -- event to help auto PB / for new people who join the server (find style)
     CS:AddTag(player,"tagged")
     player.CharacterAdded:Connect(function(char)
         char.ChildAdded:Connect(function(child)
@@ -609,7 +609,7 @@ game:GetService("Players").PlayerAdded:Connect(function(player) -- event to help
         end)
     end)
 end)
-for i,v in pairs(game:GetService("Players"):GetChildren()) do
+for i,v in pairs(game:GetService("Players"):GetChildren()) do -- loop to help auto PB for any non new people in the server (find style)
     if v.Name ~= plr.Name and not CS:HasTag(v,"tagged") then
         if plr.Character then
             local connection
