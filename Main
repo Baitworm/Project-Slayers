@@ -1,641 +1,332 @@
--- toggles
-getgenv().clickToggle = false
 getgenv().questToggle = false
-getgenv().duraToggle = false
-getgenv().gangToggle = false
-getgenv().eatToggle = false
-getgenv().buyToggle = false
-getgenv().gloveToggle = false
-getgenv().PBToggle = false
-getgenv().equipToggle = false
-getgenv().depositToggle = false
--- variables
+getgenv().bagToggle = false
+getgenv().runToggle = false
+getgenv().roadworkToggle = false
+getgenv().toolToggle = false
 local plr = game:GetService("Players").LocalPlayer
 local VIM = game:GetService("VirtualInputManager")
-local CS = game:GetService("CollectionService")
-local PathfindingService = game:GetService("PathfindingService")
-local path = PathfindingService:CreatePath()
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local minStam
-local foodName
+local minStam = 6
+local bagSelected = 1
+local stamRegen = false
+local camLocation = CFrame.new(402.423035, 106.161102, 2454.84937, -0.00517782243, 0.462061912, -0.886832595, -2.32830671e-10, 0.886844516, 0.462068081, 0.999986649, 0.00239250669, -0.00459192274)
+local camera = workspace.CurrentCamera
 local covType,toolType
-local bagNum, gloveCounter
-local deliv = workspace.Quests.QuestLocations.Delivery
-local cat = workspace.Quests.QuestLocations.Cat
-local briefcase = workspace.Quests.QuestLocations.Briefcase
-local keys = plr.PlayerGui.MainGui.Keys:GetChildren()
-local pbRadius,pbAngle
-local depositConnection
--- tables
-local PBConnections = {}
-local styleIdles = {
-    Sumo = "rbxassetid://5650663387",
-    Hitman = "rbxassetid://6527845323",
-    Formless = "rbxassetid://8365652669",
-    Shadow = "rbxassetid://10391318142",
-    Wrestling = "rbxassetid://6337784130",
-    Neji = "rbxassetid://5717759261",
-    Leg = "rbxassetid://5293891962",
-    LightFeather = "rbxassetid://10455623528",
-    Muay = "rbxassetid://6340761251",
-    Basic = "rbxassetid://10391318142",
-    Boxing = "rbxassetid://5292922704",
-    Karate = "rbxassetid://5757171053",
-    RTKD = "rbxassetid://6068983753",
-    Striker = "rbxassetid://7151923743",
-    MasteredKarate = "rbxassetid://6723474934",
-    Beast = "rbxassetid://6446460446",
-    Sword = "rbxassetid://6379981122",
+local CD = game:GetService("Workspace").World.Products["Boxing Gloves"].ClickDetector -- top gloves
+local getGloveLocation = Vector3.new(416.658, 97.4138, 2455.44)
+local bag = {
+    Bag1 = Vector3.new(360.98760986328125, 97.41384887695312, 2450.333984375);
+    Bag2 = Vector3.new(360.5870361328125, 97.41384887695312, 2455.23095703125);
+    Bag3 = Vector3.new(360.92938232421875, 97.4138412475586, 2460.2177734375);
+    Bag4 = Vector3.new(361.2657165527344, 97.41386413574219, 2478.076416015625);
+    Bag5 = Vector3.new(361.22723388671875, 97.41384887695312, 2483.760986328125);
+    Bag6 = Vector3.new(361.1659851074219, 97.41384887695312, 2488.3525390625);
 }
-local playerStyles = {}
--- functions
 
-local function supportEquip(tool) -- function to help find the tool to equip
-    for i,v in pairs(plr.Backpack:GetChildren()) do
-        if string.find(v.Name,tool,1,true) then
-            if string.find(v.Name,tool,1,true) == 1 then
-               return v 
-            end
+local helperFuncs = {
+    function() -- equip gloves
+        local char = plr.Character
+        local gloves = plr.Backpack:FindFirstChild("Boxing Gloves")
+        if not gloves then return end
+        char.Humanoid:EquipTool(gloves)
+        local tool = char:FindFirstChild("Boxing Gloves")
+        if tool then
+            tool:Activate() 
         end
-    end
-    return nil
-end
-local function getKeyFromIdles(value) -- help findStyle function get the key/style of the idle it found
-    local style
-    for i,v in pairs(styleIdles) do
-        if v == value then
-            style = i
-        end
-    end
-    return style
-end
-local function findStyle(player) -- support auto pb to figure out length to wait before blocking
-    local char = player.Character
-    for i,v in pairs(char.Humanoid.Animator:GetPlayingAnimationTracks()) do
-        if getKeyFromIdles(v.Animation.AnimationId) then
-            return getKeyFromIdles(v.Animation.AnimationId)
-        end
-    end
-end
-local function block() -- auto block feature used in autoPB
-    local args = {
-        [1] = "Block",
-        [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
-        [3] = true
-    }
-    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-    wait(0.1) -- default wait to block just in case :D
-    args = {
-        [1] = "Block",
-        [2] = game:GetService("Players").LocalPlayer.Character.LocalHandler.Blocking,
-        [3] = false
-    }
-    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-end
-local function stringCombineToNumber(str)
-    local table = string.split(string.sub(str,2),",")
-    local number = tonumber(table[1])
-    if #table > 1 then
-        number = tonumber(number .. table[2])
-    end
-    return number
-end
-local function blockLength(style) -- depending on styles waits that long
-    if style == "Basic" or style == "LightFeather" or style == "Boxing" or style == "Hitman" or style == "Wrestling" or style == "Muay" or style == "Shadow" or style == "Karate" then -- put all styles and waits here
-        delay(0.2,function()
-            block()
-        end)
-    else
-        if style == "Sumo" or style == "Leg" then
-            delay(0.3,function()
-                block()
-            end)
-        else
-            if style == "RTKD" or style == "Neji" or style == "Formless" then
-                delay(0.1,function()
-                    block()
-                end)
-            else
-                delay(0.2,function()
-                    block()
-                end)
-            end
-        end
-    end
-end
-local funcs = { -- list of functions
-    autoQuest = function() -- done
-        while questToggle do
-            local char = plr.Character or plr.CharacterAdded:Wait()
-            local quest = char:FindFirstChild("Quest")
-            if quest ~= nil then
-                if quest.PlayerQuest.Value == "Cat" or quest.PlayerQuest.Value == "Briefcase" or quest.PlayerQuest.Value == "Delivery" then
-                    local loc =  quest.Location.Value
-                    if quest.PlayerQuest.Value == "Briefcase" then
-                        local case = briefcase:FindFirstChild(tostring(loc)).Case
-                        local pp = briefcase:FindFirstChild(tostring(loc)).ProximityPrompt
-                        repeat 
-                            char.HumanoidRootPart.CFrame = case.CFrame 
-                            fireproximityprompt(pp,32)
-                            wait()
-                        until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-                    else
-                        if quest.PlayerQuest.Value == "Cat" then
-                            local place = cat[tostring(loc)]
-                            local pp = place.ProximityPrompt
-                            repeat 
-                                char.HumanoidRootPart.CFrame = place.CFrame 
-                                fireproximityprompt(pp,10)
-                                wait()
-                            until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-                        else
-                            local place = deliv[tostring(loc)]
-                            repeat 
-                                char.HumanoidRootPart.CFrame = place.CFrame + place.CFrame.UpVector * -2
-                                firetouchinterest(char.HumanoidRootPart,place,0)
-                                firetouchinterest(char.HumanoidRootPart,place,1)
-                                wait()
-                            until char:FindFirstChild("Quest") == nil or quest.Objective.Value
-                        end
+    end;
+    function() -- equip combat
+        local char = plr.Character
+        local tool = plr.Backpack:FindFirstChild("Combat")
+        if not tool then return end
+        char.Humanoid:EquipTool(tool)
+    end;
+
+}
+local funcs = {
+    autoQuest = function()
+        local mt = getrawmetatable(game)
+        local oldnamecall = mt.__namecall
+        setreadonly(mt, false)
+        mt.__namecall = newcclosure(function(self, ...)
+            local args = {...}
+            if self.Name == "CombatEvent" and getnamecallmethod() == "FireServer" then
+                for i,v in pairs(args[2]) do
+                    if i == "AttackType" then
+                        return oldnamecall(self, ...)
                     end
-                else
-                    quest:Destroy()
                 end
-            else
-                local args = {
-                    [1] = "Quest"
-                }
-                game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(args))
-                char.ChildAdded:Wait()
+                return nil
             end
+            return oldnamecall(self, ...)
+        end)
+        setreadonly(mt, true)
+        while questToggle do
+            local char = plr.Character
+            local guyToTp = workspace.World.NPCs.Quests.Mina.HumanoidRootPart
+            local tweenService,tweenInfo = game:GetService("TweenService"), TweenInfo.new(8,Enum.EasingStyle.Linear,Enum.EasingDirection.Out,0,false,0)
+            char.HumanoidRootPart.CFrame = guyToTp.CFrame
+            repeat
+                local args = {
+                    [1] = "Request Quest",
+                    [2] = "CatFood6"
+                }
+                game:GetService("ReplicatedStorage").Communication.Events.QuestEvent:FireServer(unpack(args))
+                wait()
+            until game:GetService("Workspace").World.Visuals:FindFirstChild("QuestMarkerPart")
+            local tween = tweenService:Create(char.HumanoidRootPart,tweenInfo,{CFrame = game:GetService("Workspace").World.Visuals:WaitForChild("QuestMarkerPart").CFrame})
+            tween:Play()
+            while tween.PlaybackState ~= Enum.PlaybackState.Completed do
+                wait()
+            end
+            wait(1)
+        end
+    end;
+    antiAdmin = function()
+        local tab=  {
+            "VAPOR_SCRIPT";
+            "fwgrizz";
+            "XavierBxndZ";
+            "DemsPrep";
+            "BlackRabbit_GT";
+            "6oBanner";
+            "toshiwoshy";
+            "LuvRolyy";
+            "Xanzure";
+            "Superzcz";
+            "FatherYouseff";
+            "Rengret";
+            "r_Sofen";
+            "Mealikz ";
+            "evilsourr";
+            "TokensArk";
+            "adventsz";
+            "Brandon1881";
+            "Kyrushui";
+            "Jutiinian";
+            "EzraHatesYou";
+        }
+        for i,v in pairs(game:GetService("Players"):GetChildren()) do
+            if table.find(tab,v.Name,1) then
+                plr:Kick("Scallywag " + v.Name + " walking around [RELEASE] Kengun Online without a musket? You preposterous idiot, next time you see me on the trails get to steppin 😂 👎 🤡")
+            end
+        end
+        game:GetService("Players").PlayerAdded:Connect(function(player)
+            if table.find(tab,player.Name,1) then plr:Kick("Scallywag " + player.Name + " walking around [RELEASE] Kengun Online without a musket? You preposterous idiot, next time you see me on the trails get to steppin 😂 👎 🤡") end
+        end)
+    end;
+    autoBag = function()
+        local char = plr.Character
+        camera.CFrame = camLocation
+        camera.CameraType = Enum.CameraType.Scriptable
+        while bagToggle do
+            char.Humanoid:MoveTo(getGloveLocation)
+            char.Humanoid.MoveToFinished:Wait()
+            repeat
+                fireclickdetector(CD,32)
+                wait()
+            until plr.Backpack:FindFirstChild("Boxing Gloves")
+            char.Humanoid:MoveTo(bag["Bag" .. tostring(bagSelected)])
+            char.Humanoid.MoveToFinished:Wait()
+            repeat
+                helperFuncs[1]()
+                wait()
+            until char:FindFirstChild("BoxingGlovesModel")
+            repeat
+                helperFuncs[2]()
+                wait()
+            until char:FindFirstChild("Combat")
+            repeat
+                VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
+                VIM:SendMouseButtonEvent(1, 1, 0, false, game, 1)
+                if stamRegen then
+                    if char.Stamina.Value <= minStam then
+                        wait(35)
+                    end
+                end
+                wait()
+            until not char:FindFirstChild("BoxingGlovesModel")
+            char.Humanoid:UnequipTools()
+        end
+        camera.CameraType = Enum.CameraType.Custom
+    end;
+    autoRoadwork = function()
+        local tpLocation = game:GetService("Workspace").World.NPCs.Quests.Rei.HumanoidRootPart.CFrame 
+        local mt = getrawmetatable(game)
+        local oldnamecall = mt.__namecall
+        setreadonly(mt, false)
+        mt.__namecall = newcclosure(function(self, ...)
+            local args = {...}
+            if self.Name == "CombatEvent" and getnamecallmethod() == "FireServer" then
+                for i,v in pairs(args[2]) do
+                    if i == "AttackType" then
+                        return oldnamecall(self, ...)
+                    end
+                end
+                return nil
+            end
+            return oldnamecall(self, ...)
+        end)
+        setreadonly(mt, true)
+        while roadworkToggle do
+            local char = plr.Character or plr.CharacterAdded
+            char.HumanoidRootPart.CFrame = tpLocation
+            game:GetService("ReplicatedStorage").Communication.Events.Roadwork:FireServer()
+            repeat
+                local curCFrame = game:GetService("Workspace").World.Visuals:WaitForChild("MarkerPart").CFrame + Vector3.new(0,-3,0)
+                repeat
+                    char.HumanoidRootPart.CFrame = curCFrame
+                    wait(8)
+                    if not game:GetService("Workspace").World.Visuals:FindFirstChild("MarkerPart") then
+                        break
+                    end
+                until game:GetService("Workspace").World.Visuals:FindFirstChild("MarkerPart").CFrame ~= curCFrame
+            until not game:GetService("Workspace").World.Visuals:FindFirstChild("MarkerPart")
             wait()
         end
-    end,
-    autoDeposit = function() -- done
-        if depositToggle then
-            depositConnection = plr.PlayerGui.MainGui.Cash.Changed:Connect(function()
-                local guiThing = plr.PlayerGui.MainGui
-                local number = stringCombineToNumber(guiThing.Cash.Text)
-                local bankNumber
-                if guiThing.Bank.Cash.Text == "0" then
-                    bankNumber = tonumber(guiThing.Bank.Cash.Text)
-                else
-                    bankNumber = stringCombineToNumber(guiThing.Bank.Cash.Text)
-                end
-                local moneyToDeposit = number
-                if (number + bankNumber) > 300000 then
-                    moneyToDeposit = 300000 - bankNumber
-                else
-                    if bankNumber >= 300000 then
-                        moneyToDeposit =0
-                    end
-                end
-                local args = {
-                [1] = "Deposit",
-                [2] = moneyToDeposit
-                }
-                game:GetService("ReplicatedStorage").Bank:InvokeServer(unpack(args))
-                guiThing.Bank.Cash.Text = tostring(moneyToDeposit + bankNumber)
-            end)    
-        else
-            if depositConnection ~= nil then
-                depositConnection:Disconnect()
-            end
+    end;
+    autoRun = function()
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        while runToggle do
+            char = plr.Character or plr.CharacterAdded:Wait()
+            char:SetAttribute("Running", true)
+            wait()
         end
-    end,
-    autoDura = function() -- done
-        while duraToggle do
-            for i,v in pairs(workspace.TrainingStations:GetChildren()) do 
-                fireproximityprompt(v.Main.ProximityPrompt,5)
-            end  
-            wait(1/workspace:GetRealPhysicsFPS())
-        end
-        
-    end,
-    autoEat = function() -- done
-        while eatToggle do
-            for i,v in pairs(plr.Backpack:GetChildren()) do
-                if v:IsA("Tool") and v.Name == foodName then 
-                    local char = plr.Character
-                    char.Humanoid:EquipTool(v)
-                    char:FindFirstChild(v.Name):Activate()
-                    break;
-                end
-            end
-            if foodName == "Burger" or foodName == "Ramen" then
-                wait(540)
-            else
-                plr.PlayerGui.MainGui.Boosts.ChildRemoved:Wait()
-            end
-        end
-    end,
-    autoBuyFood = function() -- done
-        while buyToggle do
-            for i,v in pairs(workspace.Items:GetDescendants()) do
-                if string.find(v.Name, foodName) then 
-                    fireproximityprompt(v.Head.ProximityPrompt,12)
-                end
-            end
-            wait(1/workspace:GetRealPhysicsFPS())
-        end
-    end,
-    autoGloves = function() -- done
-        while gloveToggle do
-            local char = plr.Character
-            local bag = workspace["Punching Bags"]:GetChildren()[bagNum]
-            if char:FindFirstChild("LeftGloves") then
-                wait(1/workspace:GetRealPhysicsFPS())
-                continue
-            else
-                if char:FindFirstChild("Combat") then
-                    char.Humanoid:UnequipTools()
-                end
-            end
-            if char:FindFirstChild(foodName) and char:FindFirstChild("LeftGloves") then
-                char.Humanoid:UnequipTools()
-                char.Humanoid:EquipTool(plr.Backpack.Combat)
-            end
-            if plr.Backpack:FindFirstChild("Gloves") then
-                -- walk
-                local success,error = pcall(function()
-                    path:ComputeAsync(char.HumanoidRootPart.Position, bag.HumanoidRootPart.Position)
-                end)
-                if success then
-                    for i,v in ipairs(path:GetWaypoints()) do
-                        if v.Action == Enum.PathWaypointAction.Jump then
-                            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                        end
-                        char.Humanoid:MoveTo(v.Position)
-                        char.Humanoid.MoveToFinished:Wait()
-                    end
-                end
-                if not char:FindFirstChild("Gloves") then 
-                    char.Humanoid:EquipTool(plr.Backpack:FindFirstChild("Gloves"))
-                end
-                if not char:FindFirstChild("LeftGloves") then
-                    char:FindFirstChild("Gloves"):Activate()
-                end
-                char.Humanoid:UnequipTools()
-                char.Humanoid:EquipTool(plr.Backpack.Combat)
-            else
-                gloveCounter = 0
-                for i,v in pairs(workspace.Items:GetDescendants()) do
-                    if v.Name == "Gloves $75" then
-                        if gloveCounter == 0 then
-                            gloveCounter = gloveCounter + 1
-                        else
-                            local success,error = pcall(function()
-                                path:ComputeAsync(char.HumanoidRootPart.Position, v.Head.Position)
-                            end)
-                            if success then
-                                for i,v in ipairs(path:GetWaypoints()) do
-                                    if v.Action == Enum.PathWaypointAction.Jump then
-                                        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                                    end
-                                    char.Humanoid:MoveTo(v.Position)
-                                    char.Humanoid.MoveToFinished:Wait()
-                                end
-                            end
-                            fireproximityprompt(v.Head.ProximityPrompt,12)
-                        end
-                    end
-                end
-            end
-            wait(1/workspace:GetRealPhysicsFPS())
-        end
-    end,
-    autoClick = function() -- done
-        while clickToggle do
-            local char = plr.Character
-            if  plr.Stamina.Value <= minStam then
-                repeat wait() until plr.Stamina.Value >= tonumber(string.split(plr.PlayerGui.MainGui.StatusFrame.Stamina.stat.Text,"/")[2])
-            else
-                if char:FindFirstChild("Meditate") then
-                    for i,v in pairs(keys) do
-                        if v.Visible then
-                            VIM:SendKeyEvent(true,Enum.KeyCode[string.upper(v.Name)],false,game)
-                            VIM:SendKeyEvent(false,Enum.KeyCode[string.upper(v.Name)],false,game)
-                        end
-                    end
-                else
-                    if char:FindFirstChild("Gloves") then wait(1/workspace:GetRealPhysicsFPS()) continue end
-                    if covType == "Gloves" and not equipToggle then 
-                        if not char:FindFirstChild("LeftGloves") then 
-                            wait(1/workspace:GetRealPhysicsFPS()) 
-                            continue 
-                        end
-                    end
-                    VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
-                    VIM:SendMouseButtonEvent(1, 1, 0, false, game, 1)
-                end
-                wait(1/workspace:GetRealPhysicsFPS())
-            end
-        end
-    end,
-    autoPB = function() -- done
-        if PBToggle then
-            for i,v in pairs(game:GetService("Players"):GetChildren()) do
-                if v == plr then continue end
-                PBConnections[v:FindFirstChild("Combo")] = v.Combo.Changed:Connect(function()
-                    if v.Combo.Value == 1 then return end
-                    local yourHuman = v.Character
-                    local otherHuman = plr.Character -- variable names flipped due to laziness
-                    if (yourHuman.HumanoidRootPart.Position - otherHuman.HumanoidRootPart.Position).Magnitude <= tonumber(pbRadius) then
-                        local dot = (yourHuman.Head.Position - otherHuman.Head.Position).Unit:Dot(otherHuman.Head.CFrame.LookVector)
-                        local dotAngle = math.deg(math.acos(dot))
-                        if dotAngle <= pbAngle then
-                            local style = findStyle(v)
-                            if style == nil then
-                                style = playerStyles[v.Name]
-                            end
-                            blockLength(style)
-                        end
-                    end
-                end)
-            end
-        else
-            for i,v in pairs(PBConnections) do
-                v:Disconnect()
-            end
-        end
-    end,
-    autoEquip = function() -- done
-        while equipToggle do
-            local char = plr.Character
-            local yes
-            yes = supportEquip(toolType)
-            if yes and not char:FindFirstChild(yes.Name) then
-                char:WaitForChild("Humanoid"):EquipTool(yes)
-            end
-            wait(1/workspace:GetRealPhysicsFPS())
-        end
-    end,
-    delMouse = function() -- done
-        pcall(function()
-            game:GetService("UserInputService").MouseIconEnabled = true
-            game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
-            plr.PlayerGui.MouseGui:Destroy()  
-        end)
-    end,
-    AntiAFK = function() -- done
+        char:SetAttribute("Running", false)
+    end;
+    antiAFK = function()
         pcall(function()
             for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
                 v:Disable()
             end
         end)
+    end;
+    autoTool = function()
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        if toolToggle then    
+            char.Humanoid:EquipTool(plr.Backpack:FindFirstChild(toolType))
+            wait(1)
+        end
+        while toolToggle do
+            repeat
+                VIM:SendMouseButtonEvent(1, 1, 0, true, game, 1)
+                VIM:SendMouseButtonEvent(1, 1, 0, false, game, 1)
+                wait()
+            until char.Stamina.Value <= minStam
+            wait(35)
+        end
         
-    end,
+    end;
 }
 local function findFunc(name) -- function to find functions within the table from a string
     for i,v in pairs(funcs) do
         if string.find(i,name) then return i end
     end
 end
-local Window = OrionLib:MakeWindow({Name = "Tatakai V DOGSHIT", HidePremium = true}) -- gui creation
+local Window = OrionLib:MakeWindow({Name = "KENSHIT!", HidePremium = true}) -- gui creation
 local Tab = Window:MakeTab({
 	Name = "Farms",
-	Icon = "rbxassetid://4483345998",
+	Icon = "rbxassetid://126039094",
 	PremiumOnly = false
 })
 Tab:AddToggle({ -- Toggle for non tool trainings
 	Name = "Coventional Grind",
 	Default = false,
 	Callback = function(Value)
-        if covType == "Pullups" then
-            duraToggle = Value
-            funcs[findFunc("Dura")]()
+        if covType == "Bags" then
+            bagToggle = Value
+            if bagToggle then
+                OrionLib:MakeNotification({
+                    Name = "Bag Tutorial PT2",
+                    Content = "Hover over gloves and dont tab out also dont press any input keys",
+                    Image = "rbxassetid://126039094",
+                    Time = 7
+                })
+                OrionLib:MakeNotification({
+                    Name = "Bag Tutorial PT3",
+                    Content = "if you die it ain't resetting suck my dick nigga ",
+                    Image = "rbxassetid://126039094",
+                    Time = 7
+                })
+            end
+            funcs[findFunc("Bag")]()
         else
-            if covType == "Gloves" then
-                gloveToggle = Value
-                funcs[findFunc("Gloves")]()
+            if covType == "Money" then
+                questToggle = Value
+                funcs[findFunc("Quest")]()
             else
-                if covType == "Money" then
-                    questToggle = Value
-                    funcs[findFunc("Quest")]()
+                if covType == "Roadwork" then
+                    roadworkToggle = Value
+                    funcs[findFunc("Roadwork")]()
                 end
             end
         end
     end
 })
+Tab:AddToggle({ -- Toggle for non tool trainings
+	Name = "Tool Grind",
+	Default = false,
+	Callback = function(Value)
+        toolToggle = Value
+        funcs[findFunc("Tool")]()
+    end
+})
 Tab:AddDropdown({
-	Name = "Type",
-	Default = "Pullups",
-	Options = {"Pullups","Gloves", "Money","Gang"},
+	Name = "Coventional Type",
+	Default = "Bags",
+	Options = {"Bags","Money", "Roadwork"},
 	Callback = function(Value)
 		covType = Value
 	end    
 })
 Tab:AddDropdown({
-	Name = "Bag Select (ignore if not doing bags)",
-	Default = 1,
-	Options = {1,2,3,4,5,6,7,8},
-	Callback = function(Value)
-		bagNum = Value
-	end    
-})
-Tab:AddToggle({
-	Name = "Auto Deposit",
-	Default = false,
-	Callback = function(Value)
-        depositToggle = Value
-        funcs[findFunc("Deposit")]()
-    end
-})
-Tab:AddToggle({
-	Name = "Tool Grind",
-	Default = false,
-	Callback = function(Value)
-        equipToggle = Value
-		funcs[findFunc("Equip")]()
-    end
-})
-Tab:AddDropdown({
-	Name = "Tool",
-	Default = "Squat",
-	Options = {"Squat","Situp", "Pushup","Meditate","Jumping Rope","20 KG Dumbbell","50 KG Dumbbell","100 KG Dumbbell","200 KG Dumbbell","One-Hand", "Handstand","Burpee"},
+	Name = "Tool Type",
+	Default = "Pushups",
+	Options = {"Pushups","Squats", "Situps"},
 	Callback = function(Value)
 		toolType = Value
 	end    
 })
-local Tab2 = Window:MakeTab({
-    Name = "Mouse/Click",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-Tab2:AddSlider({
-	Name = "Minimum Stamina",
-	Min = 0,
-	Max = 1000,
-	Default = 50,
-	Color = Color3.fromRGB(0, 247, 255),
-	Increment = 1,
-	ValueName = "",
+Tab:AddDropdown({
+	Name = "Bag Select (ignore if not doing bags)",
+	Default = 1,
+	Options = {1,2,3,4,5,6},
 	Callback = function(Value)
-		minStam = Value
+		bagSelected = Value
 	end    
 })
-Tab2:AddBind({
-	Name = "Auto Click",
-	Default = Enum.KeyCode.T,
-	Hold = false,
-	Callback = function()
-		clickToggle = not clickToggle
-        local title = "Auto Click" .. " " .. tostring(clickToggle)
-        OrionLib:MakeNotification({
-            Name = title,
-            Content = "KADO A BITCH AND A HALF NO CAP",
-            Image = "rbxassetid://4483345998",
-            Time = 10
-        })
-        funcs[findFunc("Click")]()
-	end    
+local Tab2 = Window:MakeTab({
+	Name = "Misc",
+	Icon = "rbxassetid://126039094",
+	PremiumOnly = false
 })
 Tab2:AddButton({
-	Name = "Fix Mouse",
-	Callback = function()
-        funcs[findFunc("Mouse")]()
-  	end    
-})
-local Tab3 = Window:MakeTab({
-	Name = "Food",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-Tab3:AddToggle({
-	Name = "Auto Eat",
-	Default = false,
-	Callback = function(Value)
-	    eatToggle = Value
-        OrionLib:MakeNotification({
-            Name = "Bro.",
-            Content = "WHICH FUCKING RETARD WANTS TO EAT ANYTHING ASIDE FROM RAMEN, BURGER OR PROTEIN",
-            Image = "rbxassetid://4483345998",
-            Time = 10
-        })
-        funcs[findFunc("Eat")]()
-    end
-})
-Tab3:AddToggle({
-    Name = "Auto Buy",
-    Default = false,
-    Callback = function(Value)
-        buyToggle = Value
-        OrionLib:MakeNotification({
-            Name = "DIE U A WHOLE ASS BITCH",
-            Content = "I BET U FUCK BLOCKS OF CHEESE EVERYDAY U MANWHORE",
-            Image = "rbxassetid://4483345998",
-            Time = 10
-        })
-        funcs[findFunc("Buy")]()
-    end
-})
-Tab3:AddDropdown({
-	Name = "Food to auto eat/buy",
-	Default = "Protein Shake",
-	Options = {"Protein Shake","Burger","Ramen"},
-	Callback = function(Value)
-		foodName = Value
-	end    
-})
-local Tab4 = Window:MakeTab({
-	Name = "Misc",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-Tab4:AddToggle({
-    Name = "Auto PB",
-    Default = false,
-    Callback = function(Value)
-        PBToggle = Value
-        if not PBToggle then
-            OrionLib:MakeNotification({
-                Name = "W GAME",
-                Content = "games so bad that half the time animations aren't loaded so if it dont work prob that's why",
-                Image = "rbxassetid://4483345998",
-                Time = 7
-            })
-        end
-        funcs[findFunc("PB")]()
-    end
-})
-Tab4:AddSlider({
-	Name = "Auto PB Range",
-	Min = 5,
-	Max = 20,
-	Default = 12,
-	Color = Color3.fromRGB(89, 0, 255),
-	Increment = .5,
-	ValueName = "",
-	Callback = function(Value)
-		pbRadius = Value
-	end    
-})
-Tab4:AddSlider({
-	Name = "Auto PB Angle (from where they're looking)",
-	Min = 0,
-	Max = 90,
-	Default = 45,
-	Color = Color3.fromRGB(89, 0, 255),
-	Increment = .5,
-	ValueName = "",
-	Callback = function(Value)
-		pbAngle = Value
-	end    
-})
-Tab4:AddButton({
 	Name = "Anti AFK",
 	Callback = function()
         funcs[findFunc("AFK")]()
-        OrionLib:MakeNotification({
-            Name = "Anti AFK",
-            Content = "YOU FUCKING SUCK KADO SUCK MY DICK YOU STUPID FAGGOT ACTUALLY",
-            Image = "rbxassetid://4483345998",
-            Time = 10
-        })
   	end    
+})
+Tab2:AddButton({
+	Name = "Anti Admin",
+	Callback = function()
+        funcs[findFunc("Admin")]()
+  	end    
+})
+Tab2:AddToggle({ -- Toggle for non tool trainings
+	Name = "Auto Run",
+	Default = false,
+	Callback = function(Value)
+        runToggle = Value
+        funcs[findFunc("Run")]()
+    end
+})
+OrionLib:MakeNotification({
+    Name = "Bag Tutorial PT1",
+    Content = "Walk into gym",
+    Image = "rbxassetid://126039094",
+    Time = 7
 })
 plr.CharacterAdded:Connect(function(char) -- after death keep farmin money
     wait(6)
     funcs[findFunc("Quest")]()
+    funcs[findFunc("Roadwork")]()
 end)
--- random events :D
-
-game:GetService("Players").PlayerAdded:Connect(function(player) -- event to help auto PB / for new people who join the server (find style)
-    CS:AddTag(player,"tagged")
-    player.CharacterAdded:Connect(function(char)
-        char.ChildAdded:Connect(function(child)
-            if child.Name == "Combat" then            
-                playerStyles[player.Name] = findStyle(player)
-            end
-        end)
-    end)
-end)
-for i,v in pairs(game:GetService("Players"):GetChildren()) do -- loop to help auto PB for any non new people in the server (find style)
-    if v.Name ~= plr.Name and not CS:HasTag(v,"tagged") then
-        if plr.Character then
-            local connection
-            connection = plr.Character.ChildAdded:Connect(function(child)
-                if child.Name == "Combat" then
-                    playerStyles[v.Name] = findStyle(v)
-                    connection:Disconnect()
-                end
-            end)
-            plr.CharacterAdded:Connect(function(char)
-                char.ChildAdded:Connect(function(child)
-                    if child.Name == "Combat" then
-                        playerStyles[v.Name] = findStyle(v)
-                    end
-                end)
-            end)
-        else
-            plr.CharacterAdded:Connect(function(char)
-                char.ChildAdded:Connect(function(child)
-                    if child.Name == "Combat" then
-                        playerStyles[v.Name] = findStyle(v)
-                    end
-                end)
-            end)
-        end
-    end
-end
-OrionLib:Init()
